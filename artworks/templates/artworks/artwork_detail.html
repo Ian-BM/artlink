@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ artwork.title }} - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+    .artwork-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .artwork-detail {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 3rem;
+        align-items: start;
+        margin-bottom: 3rem;
+    }
+
+    .artwork-image {
+        aspect-ratio: 732 / 937;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #f7f7f7;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        position: sticky;
+        top: 100px;
+    }
+
+    .artwork-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .artwork-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .artwork-info h1 {
+        font-size: 2.2rem;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .artwork-artist-link {
+        color: var(--gold);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+
+    .artwork-artist-link:hover {
+        color: var(--gold-dark);
+        text-decoration: underline;
+    }
+
+    .artwork-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid var(--gold);
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .meta-label {
+        font-size: 0.85rem;
+        color: #999;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .meta-value {
+        font-size: 1.2rem;
+        color: #2c3e50;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .price-section {
+        padding: 1rem;
+        background: #f9f9f9;
+        color: #111;
+        border-radius: 12px;
+        text-align: center;
+        border: 2px solid var(--gold);
+    }
+
+    .price-label {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-bottom: 0.25rem;
+    }
+
+    .price-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--gold);
+    }
+
+    .artwork-description {
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #ecf0f1;
+        line-height: 1.8;
+        color: #555;
+        font-size: 1.05rem;
+    }
+
+    .artwork-description h3 {
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+    }
+
+    .certificate-section {
+        padding: 1.5rem;
+        background: #e8f8f5;
+        border-radius: 12px;
+        border-left: 4px solid #27ae60;
+    }
+
+    .certificate-section h3 {
+        color: #27ae60;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .certificate-id {
+        font-family: monospace;
+        background: white;
+        padding: 0.75rem;
+        border-radius: 6px;
+        word-break: break-all;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .auth-badge {
+        background-color: #27ae60;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 1rem;
+        text-align: center;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background-color: var(--gold);
+        color: #111;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--gold-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 191, 4, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: #ecf0f1;
+        color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+        background-color: #d5dbdb;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 8% auto;
+        padding: 2rem;
+        border-radius: 16px;
+        max-width: 500px;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #ecf0f1;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.5rem;
+    }
+
+    .close {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+        background: none;
+        border: none;
+    }
+
+    .close:hover {
+        color: #333;
+    }
+
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .modal-form textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 120px;
+        transition: border-color 0.3s;
+    }
+
+    .modal-form textarea:focus {
+        outline: none;
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .modal-form button {
+        padding: 0.75rem;
+        background-color: var(--gold);
+        color: #111;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .modal-form button:hover {
+        background-color: var(--gold-dark);
+    }
+
+    @media (max-width: 768px) {
+        .artwork-detail {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .artwork-info h1 {
+            font-size: 1.8rem;
+        }
+
+        .artwork-image {
+            position: static;
+        }
+
+        .artwork-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            margin: 20% auto;
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="artwork-detail-container">
+    <div class="artwork-detail">
+        <div class="artwork-image">
+            <img src="{% if artwork.images %}{{ artwork.images.url }}{% else %}https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80{% endif %}" alt="{{ artwork.title }}">
+        </div>
+        <div class="artwork-info">
+            <h1>{{ artwork.title }}</h1>
+            
+            <div class="artwork-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Artist</span>
+                    <span class="meta-value"><a href="{% url 'artist_profile' artwork.artist.pk %}" class="artwork-artist-link">{{ artwork.artist.username }}</a></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Medium</span>
+                    <span class="meta-value">{{ artwork.get_medium_display }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Year</span>
+                    <span class="meta-value">{{ artwork.year_created }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Size</span>
+                    <span class="meta-value">{{ artwork.size }}</span>
+                </div>
+            </div>
+
+            <div class="price-section">
+                <div class="price-label">Price</div>
+                <div class="price-value">${{ artwork.price }}</div>
+            </div>
+
+            <div class="artwork-description">
+                <h3>About This Artwork</h3>
+                <p>{{ artwork.description }}</p>
+            </div>
+
+            {% if certificate %}
+            <div class="certificate-section">
+                <h3>🎖️ Certificate of Authenticity</h3>
+                <p style="margin-bottom: 0.75rem; color: #27ae60;">ID: <code style="font-size: 0.9rem;">{{ certificate.certificate_id }}</code></p>
+                <span class="auth-badge">Verified Authentic</span>
+                {% if certificate.certificate_pdf %}
+                <a href="{{ certificate.certificate_pdf.url }}" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top: 1rem; display: inline-block;">View Certificate PDF</a>
+                {% else %}
+                <p style="margin-top: 1rem; color: #666;">Certificate PDF is not available.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openContactModal()">✉️ Contact Artist</button>
+                <a href="{% url 'verify_certificate' %}" class="btn btn-secondary">🔍 Verify Authenticity</a>
+                <a href="#" class="btn btn-secondary">💬 Continue on WhatsApp</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Artist Modal -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Send Message to {{ artwork.artist.username }}</h2>
+            <button class="close" onclick="closeContactModal()">&times;</button>
+        </div>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'send_inquiry' artwork.pk %}" class="modal-form">
+            {% csrf_token %}
+            <textarea name="message" placeholder="Tell the artist about your interest in this artwork..." required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+        {% else %}
+        <p style="color: #666; text-align: center;">Please <a href="{% url 'login' %}">login</a> to send a message to the artist.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Certificate Modal -->
+<div id="certificateModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow: auto;">
+        <div class="modal-header">
+            <h2>Certificate of Authenticity</h2>
+            <button class="close" onclick="closeCertificateModal()">&times;</button>
+        </div>
+        {% if certificate and certificate.certificate_pdf %}
+        <iframe src="{{ certificate.certificate_pdf.url }}" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
+        {% else %}
+        <p style="color: #666; text-align: center;">Certificate PDF is not available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function openContactModal() {
+    document.getElementById("contactModal").style.display = "block";
+}
+
+function closeContactModal() {
+    document.getElementById("contactModal").style.display = "none";
+}
+
+function closeCertificateModal() {
+    document.getElementById("certificateModal").style.display = "none";
+}
+
+window.onclick = function(event) {
+    let contactModal = document.getElementById("contactModal");
+    let certificateModal = document.getElementById("certificateModal");
+    if (event.target == contactModal) {
+        contactModal.style.display = "none";
+    }
+    if (event.target == certificateModal) {
+        certificateModal.style.display = "none";
+    }
+}
+</script>
+{% endblock %}

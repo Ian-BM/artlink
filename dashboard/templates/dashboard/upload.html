@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Artwork - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+    .upload-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .upload-container h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+    }
+
+    .upload-intro {
+        text-align: center;
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.05rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #27ae60;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .file-upload-wrapper {
+        position: relative;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #f8f9fa;
+    }
+
+    .file-upload-wrapper:hover {
+        border-color: #27ae60;
+        background: #f0fdf4;
+    }
+
+    .file-upload-wrapper input[type="file"] {
+        display: none;
+    }
+
+    .file-upload-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload-text {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    .file-name {
+        margin-top: 0.5rem;
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.25rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .submit-btn:hover {
+        background-color: #229954;
+        transform: translateY(-2px);
+    }
+
+    .required {
+        color: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+        .upload-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="upload-container">
+    <h1>🎨 Upload New Artwork</h1>
+    <p class="upload-intro">Share your masterpiece with the world and reach art collectors. Fill in the details below to list your artwork.</p>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="title">Artwork Title <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required placeholder="e.g., Sunset Over Mountains" value="{{ form.title.value|default:'' }}">
+            {% if form.title.errors %}<small style="color: #e74c3c;">{{ form.title.errors.0 }}</small>{% endif %}
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="price">Price ($) <span class="required">*</span></label>
+                <input type="number" id="price" name="price" required step="0.01" placeholder="1000" value="{{ form.price.value|default:'' }}">
+                {% if form.price.errors %}<small style="color: #e74c3c;">{{ form.price.errors.0 }}</small>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="year_created">Year Created <span class="required">*</span></label>
+                <input type="number" id="year_created" name="year_created" required placeholder="2024" value="{{ form.year_created.value|default:'' }}">
+                {% if form.year_created.errors %}<small style="color: #e74c3c;">{{ form.year_created.errors.0 }}</small>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="medium">Medium <span class="required">*</span></label>
+                <select id="medium" name="medium" required>
+                    <option value="">Select Medium</option>
+                    <option value="oil" {% if form.medium.value == 'oil' %}selected{% endif %}>Oil</option>
+                    <option value="acrylic" {% if form.medium.value == 'acrylic' %}selected{% endif %}>Acrylic</option>
+                    <option value="watercolor" {% if form.medium.value == 'watercolor' %}selected{% endif %}>Watercolor</option>
+                    <option value="mixed" {% if form.medium.value == 'mixed' %}selected{% endif %}>Mixed Media</option>
+                    <option value="other" {% if form.medium.value == 'other' %}selected{% endif %}>Other</option>
+                </select>
+                {% if form.medium.errors %}<small style="color: #e74c3c;">{{ form.medium.errors.0 }}</small>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="size">Size <span class="required">*</span></label>
+                <input type="text" id="size" name="size" required placeholder="e.g., 24x30 inches" value="{{ form.size.value|default:'' }}">
+                {% if form.size.errors %}<small style="color: #e74c3c;">{{ form.size.errors.0 }}</small>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description <span class="required">*</span></label>
+            <textarea id="description" name="description" required placeholder="Describe your artwork, its inspiration, story, and technical details...">{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}<small style="color: #e74c3c;">{{ form.description.errors.0 }}</small>{% endif %}
+            <small class="help-text">Be detailed! This helps collectors understand your work better.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="images">Artwork Image <span class="required">*</span></label>
+            <div class="file-upload-wrapper" onclick="document.getElementById('images').click();">
+                <div class="file-upload-icon">🖼️</div>
+                <div class="file-upload-text">Click or drag image here</div>
+                <input type="file" id="images" name="images" required accept="image/*">
+                <div class="file-name" id="imageName"></div>
+            </div>
+            {% if form.images.errors %}<small style="color: #e74c3c;">{{ form.images.errors.0 }}</small>{% endif %}
+            <small class="help-text">Recommended: 732 x 937 pixels. High-quality images only.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="certificate_pdf">Certificate of Authenticity (PDF)</label>
+            <div class="file-upload-wrapper" onclick="document.getElementById('certificate_pdf').click();">
+                <div class="file-upload-icon">📄</div>
+                <div class="file-upload-text">Click or drag PDF here</div>
+                <input type="file" id="certificate_pdf" name="certificate_pdf" accept=".pdf">
+                <div class="file-name" id="certificateName"></div>
+            </div>
+            <small class="help-text">Upload a PDF certificate to verify authenticity. (Optional)</small>
+        </div>
+
+        <button type="submit" class="submit-btn">Upload Artwork</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('images').addEventListener('change', function(e) {
+    document.getElementById('imageName').textContent = '✓ ' + (e.target.files[0]?.name || '');
+});
+
+document.getElementById('certificate_pdf').addEventListener('change', function(e) {
+    document.getElementById('certificateName').textContent = '✓ ' + (e.target.files[0]?.name || '');
+});
+</script>
+{% endblock %}

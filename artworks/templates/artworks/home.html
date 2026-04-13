@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Max atelier - Discover Authentic Art{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Discover and Collect Authentic Art</h1>
+        <p>Explore premium artwork, discover curated artists, and verify authenticity across a global gallery marketplace.</p>
+        <div class="hero-buttons">
+            <a href="{% url 'marketplace' %}" class="btn">Browse Art</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Become an Artist</a>
+        </div>
+    </div>
+</section>
+
+<section class="grid">
+    <div class="section-headline">
+        <h2>Featured Artworks</h2>
+        <p>Gallery-ready pieces with verified authenticity and premium presentation.</p>
+    </div>
+    <div class="grid grid-3">
+        {% for artwork in featured_artworks %}
+        <div class="card fade-in">
+            <a href="{% url 'artwork_detail' artwork.pk %}" class="card-image">
+                <img src="{% if artwork.images %}{{ artwork.images.url }}{% else %}https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artwork.title }}">
+            </a>
+            <div class="card-content">
+                <h3><a href="{% url 'artwork_detail' artwork.pk %}">{{ artwork.title }}</a></h3>
+                <p class="artist-meta"><a href="{% url 'artist_profile' artwork.artist.pk %}">{{ artwork.artist.username }}</a></p>
+                <p class="price">${{ artwork.price }}</p>
+                <span class="availability-badge">{{ artwork.status|capfirst }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="grid">
+    <div class="section-headline">
+        <h2>Featured Artists</h2>
+        <p>Curated profiles from the most sought-after creators across the platform.</p>
+    </div>
+    <div class="artist-row">
+        {% for profile in featured_artists %}
+        <div class="artist-card fade-in">
+            <a href="{% url 'artist_profile' profile.user.pk %}">
+                <img class="artist-avatar" src="{% if profile.profile_image %}{{ profile.profile_image.url }}{% else %}https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ profile.user.username }}">
+            </a>
+            <h3><a href="{% url 'artist_profile' profile.user.pk %}">{{ profile.user.username }}</a></h3>
+            <span class="artist-meta">{{ profile.location|default:'Global' }}</span>
+            <span class="artist-meta">{{ profile.user.artworks.count }} artworks</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="grid">
+    <div class="section-headline">
+        <h2>Our Reach</h2>
+        <p>Trusted by collectors and artists around the world, with authenticated pieces and global marketplace access.</p>
+    </div>
+    <div class="feature-panel">
+        <div class="feature-card fade-in">
+            <h3>Verified Authenticity</h3>
+            <p>Every artwork includes a certificate and verification process to ensure collectors can buy with confidence.</p>
+        </div>
+        <div class="feature-card fade-in">
+            <h3>Curated Artists</h3>
+            <p>We showcase a carefully selected global network of artists, ensuring quality and originality in every collection.</p>
+        </div>
+        <div class="feature-card fade-in">
+            <h3>Global Marketplace</h3>
+            <p>Browse, discover, and purchase artwork from a worldwide gallery community with seamless access.</p>
+        </div>
+    </div>
+</section>
+
+<section class="grid">
+    <div class="section-headline">
+        <h2>Navigate ArtLink</h2>
+        <p>Quick access to the most important sections of the marketplace.</p>
+    </div>
+    <div class="quick-links">
+        <div class="quick-link-card fade-in"><a href="{% url 'marketplace' %}">Marketplace</a></div>
+        <div class="quick-link-card fade-in"><a href="{% url 'artists' %}">Artists</a></div>
+        <div class="quick-link-card fade-in"><a href="{% url 'verify_certificate' %}">Verify Art</a></div>
+        <div class="quick-link-card fade-in"><a href="{% url 'register' %}">Join ArtLink</a></div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Send Inquiry - ArtLink{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Send Message to {{ artwork.artist.username }}</h1>
+    <p>Interested in this artwork? Send a message to the artist!</p>
+    
+    <p><strong>{{ artwork.title }}</strong> - ${{ artwork.price }}</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Send Message</button>
+    </form>
+</div>
+{% endblock %}

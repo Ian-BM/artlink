@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Create an Account - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+
+:root{
+    --gold:#C9A45C;
+    --gold-dark:#A8843F;
+    --text:#222;
+    --light-text:#666;
+}
+
+/* Container */
+
+.register-choice-container{
+    max-width:900px;
+    margin:80px auto;
+    padding:0 20px;
+}
+
+/* Heading */
+
+.register-choice-container h1{
+    text-align:center;
+    font-size:34px;
+    font-weight:600;
+    margin-bottom:10px;
+    color:var(--text);
+}
+
+.register-subtitle{
+    text-align:center;
+    color:var(--light-text);
+    margin-bottom:50px;
+    font-size:16px;
+}
+
+/* Grid */
+
+.choice-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:30px;
+}
+
+/* Cards */
+
+.choice-card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:8px;
+    padding:40px;
+    text-align:center;
+    transition:all .25s ease;
+}
+
+.choice-card:hover{
+    border-color:var(--gold);
+    transform:translateY(-4px);
+}
+
+/* Titles */
+
+.choice-card h2{
+    font-size:22px;
+    margin-bottom:15px;
+    color:var(--text);
+}
+
+/* Text */
+
+.choice-card p{
+    color:var(--light-text);
+    line-height:1.7;
+    font-size:15px;
+    margin-bottom:30px;
+}
+
+/* Buttons */
+
+.btn-register{
+    display:inline-block;
+    padding:14px 30px;
+    border:1px solid var(--gold);
+    color:#fff;
+    background:var(--gold);
+    text-decoration:none;
+    font-size:14px;
+    letter-spacing:.5px;
+    border-radius:4px;
+    transition:all .25s ease;
+}
+
+.btn-register:hover{
+    background:var(--gold-dark);
+    border-color:var(--gold-dark);
+}
+
+/* Mobile */
+
+@media(max-width:768px){
+
+.choice-grid{
+    grid-template-columns:1fr;
+}
+
+.register-choice-container{
+    margin:60px auto;
+}
+
+}
+
+</style>
+
+
+<div class="register-choice-container">
+
+<h1>Create Your ArtLink Account</h1>
+<p class="register-subtitle">
+Join a trusted platform where artists showcase authentic work and collectors discover exceptional art.
+</p>
+
+<div class="choice-grid">
+
+<div class="choice-card">
+
+<h2>Collector Account</h2>
+
+<p>
+Browse curated artworks, verify authenticity certificates, and connect directly with artists to build your personal collection.
+</p>
+
+<a href="{% url 'register_buyer' %}" class="btn-register">
+Register as Collector
+</a>
+
+</div>
+
+
+<div class="choice-card">
+
+<h2>Artist Account</h2>
+
+<p>
+Showcase your artwork, reach global collectors, and sell verified original pieces with certificate authentication.
+</p>
+
+<a href="{% url 'register_artist' %}" class="btn-register">
+Register as Artist
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

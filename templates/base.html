@@ -1,0 +1,702 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Max Atelier - Discover Authentic Art{% endblock %}</title>
+
+    <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Enigmatica:wght@400;500;600;700&family=Elsie:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+/* ArtLink Styles - Elegant Art Gallery Aesthetic */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Enigmatica', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #f4f2f3 0%, #c3cbd6 100%);
+    color: #111;
+    line-height: 1.75;
+    min-height: 100vh;
+}
+
+:root {
+    --page-bg: #fff;
+    --surface: #f9f7f2;
+    --surface-dark: #111;
+    --text: #111;
+    --muted: #666;
+    --gold: #efbf04;
+    --gold-dark: #c99f02;
+    --border: rgba(17, 17, 17, 0.08);
+}
+
+header {
+    background-color: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 12px 40px rgba(17, 17, 17, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-family: 'Elsie', serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: var(--gold);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:10px;
+text-decoration:none;
+}
+
+.logo-img{
+height:40px;
+width:auto;
+}
+
+.brand-name{
+font-family:'Elsie', serif;
+font-weight:900;
+font-size:1.5rem;
+color:#111;
+letter-spacing:2px;
+}
+
+
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--surface-dark);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--gold);
+}
+
+main {
+    min-height: calc(100vh - 200px);
+}
+
+footer {
+    background-color: #111;
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255,255,255,0.72);
+}
+
+footer p {
+    margin: 0.5rem 0;
+}
+
+.whatsapp-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.messages {
+    margin: 1rem 2rem;
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(180deg, rgba(17, 17, 17, 0.72), rgba(17, 17, 17, 0.92)), url("/static/images/hero.png") center/cover;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #f8f6ef;
+    padding: 4rem 2rem;
+}
+
+.hero-content {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.hero-content h1 {
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+    line-height: 1.02;
+}
+
+.hero-content p {
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
+    margin-bottom: 2rem;
+    color: rgba(248, 246, 239, 0.85);
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-buttons {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: var(--gold);
+    color: var(--surface-dark);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s, transform 0.2s;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background-color: var(--gold-dark);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid rgb(255, 255, 255);
+    color: #fff;
+    margin-left: 0;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
+/* Grid Layouts */
+.grid {
+    display: grid;
+    gap: 2rem;
+    padding: 3rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.section-headline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.section-headline h2 {
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--surface-dark);
+}
+
+.section-headline p {
+    color: var(--muted);
+    margin: 0;
+}
+
+/* Cards */
+.card {
+    background: rgb(235, 235, 235);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.08);
+    overflow: hidden;
+    transition: transform 0.25s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card-image {
+    width: 100%;
+    aspect-ratio: 732 / 937;
+    overflow: hidden;
+    background: #111;
+    position: relative;
+}
+
+.card-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(17,17,17,0.0), rgba(17,17,17,0.18));
+    pointer-events: none;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-content {
+    padding: 1.75rem;
+}
+
+.card h3 {
+    margin-bottom: 0.65rem;
+    font-size: 1.35rem;
+    line-height: 1.15;
+}
+
+.card h3 a {
+    color: #111;
+    text-decoration: none;
+    font-family: 'Elsie', serif;
+    font-weight: 900;
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    transition: color 0.3s;
+}
+
+.card h3 a:hover {
+    color: var(--gold);
+}
+
+.card p {
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
+}
+
+.card .price {
+    font-weight: 700;
+    color: var(--surface-dark);
+    font-size: 1.2rem;
+}
+
+.availability-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(239, 191, 4, 0.12);
+    color: #4a3710;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    margin-top: 0.5rem;
+}
+
+.artist-row {
+    display: grid;
+    grid-auto-flow: column;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    justify-content: center;
+}
+
+.artist-row::-webkit-scrollbar {
+    display: none;
+}
+
+.artist-card {
+    min-width: 180px;
+    max-width: 200px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0.75rem;
+    border: 1px solid rgba(17, 17, 17, 0.1);
+    background: #c3cbd6;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+}
+
+.artist-card:hover {
+    box-shadow: 0 6px 16px rgba(239, 191, 4, 0.12);
+    border-color: var(--gold);
+}
+
+.artist-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+    border: 2px solid var(--gold);
+}
+
+.artist-card h3 {
+    margin-bottom: 0.25rem;
+    font-size: 1.15rem;
+    font-family: 'Elsie', serif;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: 0.02em;
+}
+
+.artist-card h3 a {
+    color: #111;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.artist-card h3 a:hover {
+    color: var(--gold);
+}
+
+.artist-meta {
+    display: block;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.feature-panel {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-top: 1rem;
+}
+
+.feature-card {
+    background: #c3cbd6;
+    color: #111;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.08);
+}
+
+.feature-card h3 {
+    margin-bottom: 0.75rem;
+    font-size: 1.15rem;
+    color: #111;
+}
+
+.feature-card p {
+    color: #666;
+    margin: 0;
+}
+
+.quick-links {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin: 3rem 0 1rem;
+}
+
+.quick-link-card {
+    background: #c3cbd6;
+    border: 1px solid #c3cbd6;
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    transition: transform 0.25s;
+}
+
+.quick-link-card:hover {
+    transform: translateY(-2px);
+}
+
+.quick-link-card a {
+    color: #111;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.artwork-detail {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.artwork-detail .artwork-image {
+    width: 100%;
+    aspect-ratio: 732 / 937;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #f7f7f7;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.artwork-detail .artwork-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.artwork-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.artwork-info h1 {
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    color: #2c3e50;
+}
+
+
+/* Forms */
+.form-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Authenticity Badge */
+.auth-badge {
+    background-color: #27ae60;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+/* HAMBURGER */
+
+.hamburger{
+display:none;
+flex-direction:column;
+gap:5px;
+background:none;
+border:none;
+cursor:pointer;
+}
+
+.hamburger span{
+width:25px;
+height:3px;
+background:#111;
+display:block;
+border-radius:2px;
+}
+
+/* MOBILE NAV */
+
+@media (max-width: 900px){
+
+.hamburger{
+display:flex;
+}
+
+.nav-links{
+position:absolute;
+top:70px;
+right:0;
+background:white;
+flex-direction:column;
+width:220px;
+padding:20px;
+gap:20px;
+border-left:1px solid #eee;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+display:none;
+}
+
+.nav-links.active{
+display:flex;
+}
+
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+    }
+
+    .artist-row {
+        grid-auto-flow: row;
+        overflow: visible;
+    }
+
+    .artwork-detail {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+    </style>
+</head>
+<script>
+
+function toggleMenu(){
+const menu = document.getElementById("navLinks");
+menu.classList.toggle("active");
+}
+
+</script>
+
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+
+            <a href="{% url 'home' %}" class="logo">
+                <img src="{% static 'images/max-atelier-logo1.png' %}" class="logo-img">
+                <span class="brand-name">Max Atelier</span>
+            </a>
+
+            <button class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+
+                <li><a href="{% url 'marketplace' %}">Marketplace</a></li>
+                <li><a href="{% url 'artists' %}">Artists</a></li>
+
+                {% if user.is_authenticated %}
+
+                    {% if user.profile.user_type == 'artist' %}
+                    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    {% endif %}
+
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+
+                {% else %}  
+
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}">Register</a></li>
+
+                {% endif %}
+
+            </ul>
+
+</div>
+</nav>
+    </header>
+    <main>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2026 ArtLink. All rights reserved.</p>
+        <p>If there is any problem in navigation, please text us on WhatsApp: <a href="https://wa.me/0754938633" class="whatsapp-link">0754938633</a></p>
+    </footer>
+</body>
+</html>
