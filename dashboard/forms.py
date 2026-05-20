@@ -1,9 +1,16 @@
 from django import forms
+from django.core.validators import FileExtensionValidator
 from artworks.models import Artwork, Certificate
 from dashboard.models import Inquiry
 
 class ArtworkForm(forms.ModelForm):
-    certificate_pdf = forms.FileField(required=False, label='Certificate of Authenticity (PDF)', help_text='Upload a PDF file for the certificate')
+    # Restrict certificate uploads to PDFs only to reduce unsafe file handling.
+    certificate_pdf = forms.FileField(
+        required=False,
+        label='Certificate of Authenticity (PDF)',
+        help_text='Upload a PDF file for the certificate',
+        validators=[FileExtensionValidator(['pdf'])],
+    )
     
     class Meta:
         model = Artwork

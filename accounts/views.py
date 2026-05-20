@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from .models import Profile
 from .forms import BuyerRegistrationForm, ArtistRegistrationForm
 
@@ -81,8 +82,12 @@ def register(request):
 
 
 from django.contrib.auth import logout
-from django.shortcuts import redirect
 
+@require_POST
 def logout_view(request):
+    """Log out the authenticated user using POST only.
+
+    Using POST for logout prevents CSRF attacks via a GET request.
+    """
     logout(request)
     return redirect('home')

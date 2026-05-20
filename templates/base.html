@@ -632,6 +632,21 @@ display:flex;
 .fade-in {
     animation: fadeIn 0.6s ease-out;
 }
+
+.logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+}
     </style>
 </head>
 <script>
@@ -670,7 +685,12 @@ menu.classList.toggle("active");
                     <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
                     {% endif %}
 
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-button">Logout</button>
+                        </form>
+                    </li>
 
                 {% else %}  
 

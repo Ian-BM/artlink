@@ -1,5 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from .models import Profile
 
 COUNTRY_CODES = [
@@ -83,6 +86,8 @@ class BuyerRegistrationForm(forms.ModelForm):
         fields = ('first_name', 'last_name', 'email')
 
     def clean(self):
+        # Normalize and validate all buyer registration fields.
+        # This ensures email collisions cannot be used to create duplicate buyer accounts.
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         password_confirm = cleaned_data.get('password_confirm')
@@ -90,6 +95,11 @@ class BuyerRegistrationForm(forms.ModelForm):
         last_name = cleaned_data.get('last_name')
         country_code = cleaned_data.get('country_code')
         phone_number = cleaned_data.get('phone_number')
+        email = cleaned_data.get('email')
+
+        if email:
+            email = email.strip().lower()
+            cleaned_data['email'] = email
 
         if not first_name:
             raise forms.ValidationError("First name is required.")
@@ -101,8 +111,13 @@ class BuyerRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Phone number is required.")
         if password != password_confirm:
             raise forms.ValidationError("Passwords do not match.")
-        if len(password) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long.")
+        if password:
+            try:
+                validate_password(password)
+            except ValidationError as exc:
+                raise forms.ValidationError(exc.messages)
+        if email and (User.objects.filter(username=email).exists() or User.objects.filter(email=email).exists()):
+            raise forms.ValidationError("A user with this email address already exists.")
         
         return cleaned_data
 
@@ -110,13 +125,19 @@ class ArtistRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True, label="Password")
     password_confirm = forms.CharField(widget=forms.PasswordInput, required=True, label="Confirm Password")
     email = forms.EmailField(required=True)
-    profile_picture = forms.ImageField(required=False, label="Profile Picture")
+    profile_picture = forms.ImageField(
+        required=False,
+        label="Profile Picture",
+        help_text="Upload a valid image file.",
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])],
+    )
 
     class Meta:
         model = User
         fields = ('username', 'email')
 
     def clean(self):
+        # Enforce strong password rules and unique username/email for artists.
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         password_confirm = cleaned_data.get('password_confirm')
@@ -126,9 +147,19 @@ class ArtistRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Username is required.")
         if password != password_confirm:
             raise forms.ValidationError("Passwords do not match.")
-        if len(password) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long.")
-        if User.objects.filter(username=username).exists():
+        if password:
+            try:
+                validate_password(password)
+            except ValidationError as exc:
+                raise forms.ValidationError(exc.messages)
+        if username and User.objects.filter(username=username).exists():
             raise forms.ValidationError("Username already exists.")
+
+        email = cleaned_data.get('email')
+        if email:
+            email = email.strip().lower()
+            cleaned_data['email'] = email
+            if User.objects.filter(email=email).exists():
+                raise forms.ValidationError("A user with this email address already exists.")
         
         return cleaned_data
