@@ -38,14 +38,18 @@ body {
     --gold: #efbf04;
     --gold-dark: #c99f02;
     --border: rgba(17, 17, 17, 0.08);
+    --shadow: 0 18px 45px rgba(17, 17, 17, 0.09);
+    --shadow-soft: 0 8px 24px rgba(17, 17, 17, 0.07);
 }
 
 header {
-    background-color: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 12px 40px rgba(17, 17, 17, 0.08);
+    background-color: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+    box-shadow: 0 10px 30px rgba(17, 17, 17, 0.05);
     position: sticky;
     top: 0;
     z-index: 100;
+    backdrop-filter: blur(16px);
 }
 
 .nav-container {
@@ -54,39 +58,33 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 1rem;
+    padding: 0.65rem 1.25rem;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     text-decoration: none;
     font-family: 'Elsie', serif;
     font-weight: 900;
-    font-size: 1.8rem;
-    color: var(--gold);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-
-.logo{
-display:flex;
-align-items:center;
-gap:10px;
-text-decoration:none;
+    color: #111;
 }
 
 .logo-img{
-height:40px;
-width:auto;
+    height: 48px;
+    width: 48px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(17, 17, 17, 0.12));
 }
 
 .brand-name{
-font-family:'Elsie', serif;
-font-weight:900;
-font-size:1.5rem;
-color:#111;
-letter-spacing:2px;
+    font-family:'Elsie', serif;
+    font-weight:900;
+    font-size:1.45rem;
+    color:#111;
+    letter-spacing:1px;
+    line-height: 1;
 }
 
 
@@ -94,18 +92,22 @@ letter-spacing:2px;
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 2rem;
+    align-items: center;
+    gap: 0.35rem;
 }
 
 .nav-links a {
     text-decoration: none;
     color: var(--surface-dark);
-    font-weight: 500;
-    transition: color 0.3s;
+    font-weight: 600;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    transition: color 0.3s, background-color 0.3s;
 }
 
 .nav-links a:hover {
     color: var(--gold);
+    background: rgba(239, 191, 4, 0.08);
 }
 
 main {
@@ -115,8 +117,9 @@ main {
 footer {
     background-color: #111;
     text-align: center;
-    padding: 2rem;
+    padding: 2.25rem 1.25rem;
     color: rgba(255,255,255,0.72);
+    border-top: 3px solid var(--gold);
 }
 
 footer p {
@@ -124,13 +127,28 @@ footer p {
 }
 
 .whatsapp-link {
-    color: var(--gold);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.35rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--gold);
+    color: #111;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
+    border-radius: 999px;
+    line-height: 1;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.whatsapp-link:hover {
+    background: var(--gold-dark);
+    transform: translateY(-1px);
 }
 
 .messages {
-    margin: 1rem 2rem;
+    width: min(1120px, calc(100% - 2rem));
+    margin: 1rem auto;
 }
 
 .message {
@@ -148,13 +166,13 @@ footer p {
 /* Hero Section */
 .hero {
     background: linear-gradient(180deg, rgba(17, 17, 17, 0.72), rgba(17, 17, 17, 0.92)), url("/static/images/hero.png") center/cover;
-    min-height: 80vh;
+    min-height: 76vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: #f8f6ef;
-    padding: 4rem 2rem;
+    padding: 5rem 2rem;
 }
 
 .hero-content {
@@ -163,9 +181,9 @@ footer p {
 }
 
 .hero-content h1 {
-    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-size: clamp(3rem, 5vw, 4.7rem);
     margin-bottom: 1rem;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     line-height: 1.02;
 }
 
@@ -186,29 +204,46 @@ footer p {
 }
 
 .btn {
-    display: inline-block;
-    padding: 1rem 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.35rem;
     background-color: var(--gold);
     color: var(--surface-dark);
     text-decoration: none;
     border-radius: 8px;
-    transition: background-color 0.3s, transform 0.2s;
-    font-weight: 600;
+    border: 1px solid transparent;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1.2;
 }
 
 .btn:hover {
     background-color: var(--gold-dark);
     transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.12);
 }
 
 .btn-secondary {
     background-color: transparent;
-    border: 2px solid rgb(255, 255, 255);
-    color: #fff;
+    border: 1px solid rgba(17, 17, 17, 0.18);
+    color: #111;
     margin-left: 0;
 }
 
 .btn-secondary:hover {
+    background-color: rgba(239, 191, 4, 0.1);
+    color: #111;
+    border-color: var(--gold);
+}
+
+.hero .btn-secondary {
+    border-color: rgba(255, 255, 255, 0.72);
+    color: #fff;
+}
+
+.hero .btn-secondary:hover {
     background-color: rgba(255,255,255,0.18);
     color: #fff;
 }
@@ -217,7 +252,7 @@ footer p {
 .grid {
     display: grid;
     gap: 2rem;
-    padding: 3rem 2rem;
+    padding: 3.5rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -239,10 +274,11 @@ footer p {
 }
 
 .section-headline h2 {
-    font-size: 2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
+    font-family: 'Elsie', serif;
+    font-size: clamp(2rem, 3vw, 2.7rem);
+    letter-spacing: 0;
     color: var(--surface-dark);
+    line-height: 1.05;
 }
 
 .section-headline p {
@@ -252,15 +288,18 @@ footer p {
 
 /* Cards */
 .card {
-    background: rgb(235, 235, 235);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.08);
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 8px;
+    box-shadow: var(--shadow-soft);
     overflow: hidden;
-    transition: transform 0.25s;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 
 .card:hover {
     transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    border-color: rgba(239, 191, 4, 0.35);
 }
 
 .card-image {
@@ -287,7 +326,7 @@ footer p {
 }
 
 .card-content {
-    padding: 1.75rem;
+    padding: 1.4rem;
 }
 
 .card h3 {
@@ -363,7 +402,7 @@ footer p {
     padding: 1rem 0.75rem;
     border: 1px solid rgba(17, 17, 17, 0.1);
     background: #c3cbd6;
-    border-radius: 12px;
+    border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     transition: all 0.3s ease;
 }
@@ -416,11 +455,12 @@ footer p {
 }
 
 .feature-card {
-    background: #c3cbd6;
+    background: rgba(255, 255, 255, 0.72);
     color: #111;
-    border-radius: 12px;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.08);
+    box-shadow: var(--shadow-soft);
 }
 
 .feature-card h3 {
@@ -442,9 +482,9 @@ footer p {
 }
 
 .quick-link-card {
-    background: #c3cbd6;
-    border: 1px solid #c3cbd6;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 8px;
     padding: 1.25rem 1rem;
     text-align: center;
     transition: transform 0.25s;
@@ -471,7 +511,7 @@ footer p {
     width: 100%;
     aspect-ratio: 732 / 937;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 8px;
     background: #f7f7f7;
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
@@ -492,7 +532,7 @@ footer p {
 .artwork-info h1 {
     margin-bottom: 0.5rem;
     font-size: 2.5rem;
-    color: #2c3e50;
+    color: #111;
 }
 
 
@@ -502,8 +542,9 @@ footer p {
     margin: 2rem auto;
     padding: 2rem;
     background: white;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-soft);
 }
 
 .form-group {
@@ -521,9 +562,18 @@ footer p {
 .form-group select {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 1px solid rgba(17, 17, 17, 0.16);
+    border-radius: 8px;
     font-size: 1rem;
+    background: #fff;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(239, 191, 4, 0.16);
 }
 
 .form-group textarea {
@@ -533,10 +583,11 @@ footer p {
 
 /* Authenticity Badge */
 .auth-badge {
-    background-color: #27ae60;
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    background-color: rgba(39, 174, 96, 0.12);
+    color: #17633b;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid rgba(39, 174, 96, 0.22);
+    border-radius: 999px;
     font-size: 0.8rem;
     display: inline-block;
     margin-top: 0.5rem;
@@ -645,7 +696,14 @@ display:flex;
     color: inherit;
     font: inherit;
     cursor: pointer;
-    padding: 0;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.logout-button:hover {
+    color: var(--gold);
+    background: rgba(239, 191, 4, 0.08);
 }
     </style>
 </head>
@@ -664,7 +722,7 @@ menu.classList.toggle("active");
             <div class="nav-container">
 
             <a href="{% url 'home' %}" class="logo">
-                <img src="{% static 'images/max-atelier-logo1.png' %}" class="logo-img">
+                <img src="{% static 'images/max-atelier-logo1.png' %}" class="logo-img" alt="Max Atelier">
                 <span class="brand-name">Max Atelier</span>
             </a>
 
@@ -683,6 +741,7 @@ menu.classList.toggle("active");
 
                     {% if user.profile.user_type == 'artist' %}
                     <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'edit_artist_profile' %}">Edit Profile</a></li>
                     {% endif %}
 
                     <li>
@@ -716,7 +775,7 @@ menu.classList.toggle("active");
     </main>
     <footer>
         <p>&copy; 2026 ArtLink. All rights reserved.</p>
-        <p>If there is any problem in navigation, please text us on WhatsApp: <a href="https://wa.me/0754938633" class="whatsapp-link">0754938633</a></p>
+        <p>Need help navigating? <a href="https://wa.me/0754938633" class="whatsapp-link" target="_blank" rel="noopener">WhatsApp</a></p>
     </footer>
 </body>
 </html>

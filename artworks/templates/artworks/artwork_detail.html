@@ -21,7 +21,7 @@
     .artwork-image {
         aspect-ratio: 732 / 937;
         overflow: hidden;
-        border-radius: 20px;
+        border-radius: 8px;
         background: #f7f7f7;
         box-shadow: 0 12px 32px rgba(0,0,0,0.15);
         position: sticky;
@@ -41,8 +41,10 @@
     }
 
     .artwork-info h1 {
-        font-size: 2.2rem;
-        color: #2c3e50;
+        font-family: 'Elsie', serif;
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        line-height: 1;
+        color: #111;
         margin: 0;
     }
 
@@ -64,7 +66,7 @@
         gap: 1rem;
         padding: 1.5rem;
         background: #f8f9fa;
-        border-radius: 12px;
+        border-radius: 8px;
         border-left: 4px solid var(--gold);
     }
 
@@ -83,7 +85,7 @@
 
     .meta-value {
         font-size: 1.2rem;
-        color: #2c3e50;
+        color: #111;
         font-weight: 600;
         margin-top: 0.25rem;
     }
@@ -92,7 +94,7 @@
         padding: 1rem;
         background: #f9f9f9;
         color: #111;
-        border-radius: 12px;
+        border-radius: 8px;
         text-align: center;
         border: 2px solid var(--gold);
     }
@@ -112,7 +114,7 @@
     .artwork-description {
         padding: 1.5rem;
         background: white;
-        border-radius: 12px;
+        border-radius: 8px;
         border: 1px solid #ecf0f1;
         line-height: 1.8;
         color: #555;
@@ -120,19 +122,19 @@
     }
 
     .artwork-description h3 {
-        color: #2c3e50;
+        color: #111;
         margin-bottom: 0.75rem;
     }
 
     .certificate-section {
         padding: 1.5rem;
-        background: #e8f8f5;
-        border-radius: 12px;
-        border-left: 4px solid #27ae60;
+        background: rgba(239, 191, 4, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid var(--gold);
     }
 
     .certificate-section h3 {
-        color: #27ae60;
+        color: #111;
         margin: 0 0 0.75rem 0;
     }
 
@@ -142,16 +144,17 @@
         padding: 0.75rem;
         border-radius: 6px;
         word-break: break-all;
-        color: #2c3e50;
+        color: #111;
         font-size: 0.9rem;
         margin-bottom: 1rem;
     }
 
     .auth-badge {
-        background-color: #27ae60;
-        color: white;
+        background-color: rgba(39, 174, 96, 0.12);
+        color: #17633b;
         padding: 0.4rem 0.8rem;
-        border-radius: 6px;
+        border: 1px solid rgba(39, 174, 96, 0.22);
+        border-radius: 999px;
         font-size: 0.85rem;
         display: inline-block;
     }
@@ -186,12 +189,14 @@
     }
 
     .btn-secondary {
-        background-color: #ecf0f1;
-        color: #2c3e50;
+        background-color: transparent;
+        color: #111;
+        border: 1px solid rgba(17, 17, 17, 0.18);
     }
 
     .btn-secondary:hover {
-        background-color: #d5dbdb;
+        background-color: rgba(239, 191, 4, 0.1);
+        border-color: var(--gold);
     }
 
     /* Modal Styles */
@@ -216,7 +221,7 @@
         background-color: white;
         margin: 8% auto;
         padding: 2rem;
-        border-radius: 16px;
+        border-radius: 8px;
         max-width: 500px;
         box-shadow: 0 12px 32px rgba(0,0,0,0.3);
         animation: slideIn 0.3s;
@@ -238,7 +243,7 @@
 
     .modal-header h2 {
         margin: 0;
-        color: #2c3e50;
+        color: #111;
         font-size: 1.5rem;
     }
 
@@ -358,8 +363,8 @@
 
             {% if certificate %}
             <div class="certificate-section">
-                <h3>🎖️ Certificate of Authenticity</h3>
-                <p style="margin-bottom: 0.75rem; color: #27ae60;">ID: <code style="font-size: 0.9rem;">{{ certificate.certificate_id }}</code></p>
+                <h3>Certificate of Authenticity</h3>
+                <p style="margin-bottom: 0.75rem; color: #555;">ID: <code style="font-size: 0.9rem;">{{ certificate.certificate_id }}</code></p>
                 <span class="auth-badge">Verified Authentic</span>
                 {% if certificate.certificate_pdf %}
                 <a href="{{ certificate.certificate_pdf.url }}" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top: 1rem; display: inline-block;">View Certificate PDF</a>
@@ -370,9 +375,11 @@
             {% endif %}
 
             <div class="actions">
-                <button class="btn btn-primary" onclick="openContactModal()">✉️ Contact Artist</button>
-                <a href="{% url 'verify_certificate' %}" class="btn btn-secondary">🔍 Verify Authenticity</a>
-                <a href="#" class="btn btn-secondary">💬 Continue on WhatsApp</a>
+                <button class="btn btn-primary" onclick="openContactModal()">Contact Artist</button>
+                <a href="{% url 'verify_certificate' %}" class="btn btn-secondary">Verify Authenticity</a>
+                {% if artwork.artist.profile.phone_number %}
+                <a href="https://wa.me/{{ artwork.artist.profile.phone_number|cut:' '|cut:'+' }}" target="_blank" rel="noopener" class="btn btn-secondary">WhatsApp</a>
+                {% endif %}
             </div>
         </div>
     </div>

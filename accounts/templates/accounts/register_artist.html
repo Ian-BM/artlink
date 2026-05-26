@@ -20,16 +20,18 @@
     margin:80px auto;
     padding:50px;
     background:#fff;
-    border:1px solid #eee;
+    border:1px solid var(--border);
     border-radius:8px;
+    box-shadow:var(--shadow-soft);
 }
 
 /* Header */
 
 .register-container h1{
     text-align:center;
-    font-size:30px;
-    font-weight:600;
+    font-family:'Elsie', serif;
+    font-size:34px;
+    font-weight:900;
     margin-bottom:10px;
     color:var(--text);
 }
@@ -58,8 +60,8 @@
 .form-group input{
     width:100%;
     padding:12px 14px;
-    border:1px solid #ddd;
-    border-radius:4px;
+    border:1px solid rgba(17,17,17,.16);
+    border-radius:8px;
     font-size:14px;
     transition:all .2s ease;
 }
@@ -67,6 +69,7 @@
 .form-group input:focus{
     outline:none;
     border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(239,191,4,.16);
 }
 
 /* File upload */
@@ -84,10 +87,10 @@ input[type="file"]{
     margin-top:10px;
     background:var(--gold);
     border:none;
-    color:#fff;
+    color:#111;
     font-size:14px;
     letter-spacing:.5px;
-    border-radius:4px;
+    border-radius:8px;
     cursor:pointer;
     transition:all .2s ease;
 }

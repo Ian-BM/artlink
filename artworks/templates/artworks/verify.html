@@ -3,12 +3,73 @@
 {% block title %}Verify Certificate - ArtLink{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h1>Verify Artwork Authenticity</h1>
+<style>
+    .verify-page {
+        max-width: 760px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .verify-page h1 {
+        font-family: 'Elsie', serif;
+        font-size: 2.5rem;
+        line-height: 1;
+        color: #111;
+        margin-bottom: 0.75rem;
+    }
+
+    .verify-intro {
+        color: var(--muted);
+        margin-bottom: 1.75rem;
+    }
+
+    .verification-result {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .verification-result img {
+        width: 160px;
+        aspect-ratio: 732 / 937;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        margin: 1rem 0;
+    }
+
+    .verification-status {
+        display: inline-flex;
+        margin: 0.75rem 0;
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(39, 174, 96, 0.12);
+        border: 1px solid rgba(39, 174, 96, 0.22);
+        color: #17633b;
+        font-weight: 700;
+    }
+
+    .verification-error {
+        margin-top: 1.5rem;
+        color: #721c24;
+        background: #f8d7da;
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+</style>
+
+<div class="verify-page">
+    <h1>Verify Authenticity</h1>
+    <p class="verify-intro">Enter a certificate ID to confirm artwork details and authentication status.</p>
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
-            <label for="certificate_id">Certificate ID:</label>
+            <label for="certificate_id">Certificate ID</label>
             <input type="text" id="certificate_id" name="certificate_id" required>
         </div>
         <button type="submit" class="btn">Verify</button>
@@ -21,7 +82,7 @@
         <p><strong>Artist:</strong> {{ certificate.artwork.artist.username }}</p>
         <p><strong>Year:</strong> {{ certificate.artwork.year_created }}</p>
         {% if certificate.certificate_pdf %}
-            <p><strong>Status:</strong> Verified</p>
+            <span class="verification-status">Verified</span>
             <a href="{{ certificate.certificate_pdf.url }}" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top: 1rem; display: inline-block;">View Certificate PDF</a>
         {% else %}
             <p><strong>Status:</strong> Not verified at the moment.</p>
@@ -30,9 +91,9 @@
     </div>
     {% elif request.method == 'POST' %}
         {% if certificate_status == 'invalid' %}
-            <p>Certificate ID is invalid. Please enter a valid certificate ID without quotes or extra spaces.</p>
+            <p class="verification-error">Certificate ID is invalid. Please enter a valid certificate ID without quotes or extra spaces.</p>
         {% elif certificate_status == 'not_found' %}
-            <p>Certificate not found.</p>
+            <p class="verification-error">Certificate not found.</p>
         {% endif %}
     {% endif %}
 </div>

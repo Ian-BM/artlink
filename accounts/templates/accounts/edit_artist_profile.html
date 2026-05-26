@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Artist Profile - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+    .profile-edit-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .profile-edit-header {
+        margin-bottom: 2rem;
+    }
+
+    .profile-edit-header h1 {
+        color: #111;
+        font-family: 'Elsie', serif;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-edit-header p {
+        color: var(--muted);
+        max-width: 620px;
+    }
+
+    .profile-edit-form {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        padding: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .profile-edit-form input,
+    .profile-edit-form textarea {
+        width: 100%;
+    }
+
+    .current-image {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+    }
+
+    .current-image img {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--gold);
+    }
+
+    .field-error {
+        color: #721c24;
+        font-size: 0.9rem;
+        margin-top: 0.35rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1.75rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .profile-edit-page {
+            padding: 2rem 1rem;
+        }
+
+        .profile-edit-form {
+            padding: 1.25rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="profile-edit-page">
+    <div class="profile-edit-header">
+        <h1>Edit Artist Profile</h1>
+        <p>Keep your public artist details current for collectors browsing your work.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="profile-edit-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="message error">
+            {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Artist Name</label>
+                {{ form.username }}
+                {% for error in form.username.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                {{ form.first_name }}
+                {% for error in form.first_name.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                {{ form.last_name }}
+                {% for error in form.last_name.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">Location</label>
+                {{ form.location }}
+                {% for error in form.location.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                {{ form.phone_number }}
+                {% for error in form.phone_number.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.bio.id_for_label }}">Bio</label>
+                {{ form.bio }}
+                {% for error in form.bio.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.certifications.id_for_label }}">Certifications</label>
+                {{ form.certifications }}
+                {% for error in form.certifications.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.profile_image.id_for_label }}">Profile Picture</label>
+                {% if request.user.profile.profile_image %}
+                <div class="current-image">
+                    <img src="{{ request.user.profile.profile_image.url }}" alt="{{ request.user.username }}">
+                    <span>Current profile picture</span>
+                </div>
+                {% endif %}
+                {{ form.profile_image }}
+                {% for error in form.profile_image.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="{% url 'artist_profile' request.user.pk %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

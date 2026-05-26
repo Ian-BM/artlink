@@ -5,43 +5,68 @@
 {% block content %}
 <style>
     .artists-page {
-        padding: 2rem 0;
-        max-width: 1400px;
+        padding: 3rem 2rem;
+        max-width: 1200px;
         margin: 0 auto;
-        text-align: center;
     }
 
     .artists-page h1 {
-        font-size: 3rem;
+        font-size: clamp(2.4rem, 4vw, 3.6rem);
         color: #111;
-        text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 0.5rem;
         font-family: 'Elsie', serif;
         font-weight: 900;
-        letter-spacing: 0.02em;
+        letter-spacing: 0;
+        line-height: 1;
+    }
+
+    .artists-intro {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 3px solid var(--gold);
+    }
+
+    .artists-intro p {
+        color: var(--muted);
+        max-width: 620px;
+        margin: 0;
+    }
+
+    .artists-count {
+        color: #111;
+        background: rgba(239, 191, 4, 0.12);
+        border: 1px solid rgba(239, 191, 4, 0.28);
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+        font-weight: 700;
+        white-space: nowrap;
     }
 
     .artists-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 0.5rem;
-        margin-top: 2rem;
-        justify-items: center;
-        max-width: 100%;
+        gap: 1.5rem;
     }
 
-    .artist-card {
+    .artists-page .artist-card {
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
         overflow: hidden;
         transition: all 0.3s ease;
-        border: 1px solid rgba(239, 191, 4, 0.1);
+        border: 1px solid rgba(17, 17, 17, 0.08);
+        min-width: 0;
+        max-width: none;
+        padding: 0;
     }
 
-    .artist-card:hover {
+    .artists-page .artist-card:hover {
         transform: translateY(-6px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        box-shadow: var(--shadow);
         border-color: var(--gold);
     }
 
@@ -67,7 +92,7 @@
         transition: transform 0.3s ease;
     }
 
-    .artist-card:hover .artist-image-container img {
+    .artists-page .artist-card:hover .artist-image-container img {
         transform: scale(1.05);
     }
 
@@ -82,7 +107,7 @@
         font-size: 1.4rem;
         color: #111;
         margin-bottom: 0.5rem;
-        letter-spacing: 0.02em;
+        letter-spacing: 0;
     }
 
     .artist-name a {
@@ -108,7 +133,7 @@
         font-weight: 600;
         background: rgba(239, 191, 4, 0.1);
         padding: 0.5rem 1rem;
-        border-radius: 20px;
+        border-radius: 999px;
         display: inline-block;
         border: 1px solid rgba(239, 191, 4, 0.2);
     }
@@ -116,13 +141,19 @@
     @media (max-width: 768px) {
         .artists-page h1 {
             font-size: 2.2rem;
-            margin-bottom: 2rem;
+        }
+
+        .artists-page {
+            padding: 2rem 1rem;
+        }
+
+        .artists-intro {
+            flex-direction: column;
+            align-items: start;
         }
 
         .artists-grid {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 0.25rem;
-            justify-items: center;
+            grid-template-columns: 1fr;
         }
 
         .artist-image-container {
@@ -140,11 +171,18 @@
     }
 </style>
 
-<div class="grid artists-page">
-    <h1>Featured Artists</h1>
+<div class="artists-page">
+    <div class="artists-intro">
+        <div>
+            <h1>Featured Artists</h1>
+            <p>Meet the artists shaping the Max Atelier collection.</p>
+        </div>
+        <span class="artists-count">{{ artists|length }} artists</span>
+    </div>
+
     <div class="artists-grid">
         {% for profile in artists %}
-        <div class="artist-card">
+        <article class="artist-card">
             <div class="artist-image-container">
                 <img src="{% if profile.profile_image %}{{ profile.profile_image.url }}{% else %}https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ profile.user.username }}">
             </div>
@@ -153,7 +191,7 @@
                 <p class="artist-location">{{ profile.location|default:"Global" }}</p>
                 <span class="artist-stats">{{ profile.total_artworks_sold }} artworks sold</span>
             </div>
-        </div>
+        </article>
         {% endfor %}
     </div>
 </div>

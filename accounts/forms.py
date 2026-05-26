@@ -163,3 +163,67 @@ class ArtistRegistrationForm(forms.ModelForm):
                 raise forms.ValidationError("A user with this email address already exists.")
         
         return cleaned_data
+
+
+class ArtistProfileForm(forms.ModelForm):
+    username = forms.CharField(max_length=150, required=True, label="Artist Name")
+    first_name = forms.CharField(max_length=30, required=False, label="First Name")
+    last_name = forms.CharField(max_length=150, required=False, label="Last Name")
+    email = forms.EmailField(required=True)
+    profile_image = forms.ImageField(
+        required=False,
+        label="Profile Picture",
+        help_text="Upload a valid image file.",
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])],
+    )
+
+    class Meta:
+        model = Profile
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'bio',
+            'location',
+            'phone_number',
+            'profile_image',
+            'certifications',
+        )
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Tell collectors about your work, process, and story...'}),
+            'certifications': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Awards, exhibitions, training, or certifications...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+        self.fields['username'].initial = self.user.username
+        self.fields['first_name'].initial = self.user.first_name
+        self.fields['last_name'].initial = self.user.last_name
+        self.fields['email'].initial = self.user.email
+
+    def clean_username(self):
+        username = self.cleaned_data['username'].strip()
+        if User.objects.filter(username=username).exclude(pk=self.user.pk).exists():
+            raise forms.ValidationError("Username already exists.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip().lower()
+        if User.objects.filter(email=email).exclude(pk=self.user.pk).exists():
+            raise forms.ValidationError("A user with this email address already exists.")
+        return email
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        user = self.user
+        user.username = self.cleaned_data['username']
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.email = self.cleaned_data['email']
+
+        if commit:
+            user.save()
+            profile.save()
+        return profile

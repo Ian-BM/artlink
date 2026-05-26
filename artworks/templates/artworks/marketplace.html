@@ -3,23 +3,129 @@
 {% block title %}Marketplace - ArtLink{% endblock %}
 
 {% block content %}
-<div class="grid">
-    <h1>Artwork Marketplace</h1>
-    <div class="filters">
-        <!-- Add filters here -->
+<style>
+    .marketplace-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .marketplace-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 3px solid var(--gold);
+    }
+
+    .marketplace-header h1 {
+        font-family: 'Elsie', serif;
+        font-size: clamp(2.4rem, 4vw, 3.6rem);
+        line-height: 1;
+        color: #111;
+        margin: 0 0 0.5rem;
+    }
+
+    .marketplace-header p {
+        color: var(--muted);
+        max-width: 620px;
+        margin: 0;
+    }
+
+    .marketplace-count {
+        color: #111;
+        background: rgba(239, 191, 4, 0.12);
+        border: 1px solid rgba(239, 191, 4, 0.28);
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .marketplace-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .artwork-card .card-content {
+        display: grid;
+        gap: 0.45rem;
+    }
+
+    .artwork-artist {
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .artwork-artist a {
+        color: #111;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .artwork-artist a:hover {
+        color: var(--gold);
+    }
+
+    .marketplace-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 0.4rem;
+    }
+
+    .empty-marketplace {
+        background: rgba(255, 255, 255, 0.74);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 2rem;
+        color: var(--muted);
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .marketplace-page {
+            padding: 2rem 1rem;
+        }
+
+        .marketplace-header {
+            align-items: start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="marketplace-page">
+    <div class="marketplace-header">
+        <div>
+            <h1>Browse Art</h1>
+            <p>Explore original works from artists across the Max Atelier community.</p>
+        </div>
+        <span class="marketplace-count">{{ artworks|length }} works available</span>
     </div>
-    <div class="grid grid-3">
+
+    <div class="marketplace-grid">
         {% for artwork in artworks %}
-        <div class="card">
-            <div class="card-image">
+        <article class="card artwork-card">
+            <a href="{% url 'artwork_detail' artwork.pk %}" class="card-image">
                 <img src="{% if artwork.images %}{{ artwork.images.url }}{% else %}https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artwork.title }}">
-            </div>
+            </a>
             <div class="card-content">
                 <h3><a href="{% url 'artwork_detail' artwork.pk %}">{{ artwork.title }}</a></h3>
-                <p><a href="{% url 'artist_profile' artwork.artist.pk %}">{{ artwork.artist.username }}</a></p>
-                <p class="price">${{ artwork.price }}</p>
-                <span class="auth-badge">Authentic</span>
+                <p class="artwork-artist">By <a href="{% url 'artist_profile' artwork.artist.pk %}">{{ artwork.artist.username }}</a></p>
+                <div class="marketplace-card-footer">
+                    <p class="price">${{ artwork.price }}</p>
+                    <span class="auth-badge">Authentic</span>
+                </div>
             </div>
+        </article>
+        {% empty %}
+        <div class="empty-marketplace">
+            <p>No artworks are available yet.</p>
         </div>
         {% endfor %}
     </div>

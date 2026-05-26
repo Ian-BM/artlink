@@ -7,11 +7,9 @@
     .artist-profile-header {
         background: linear-gradient(135deg, #f4f2f3 0%, #c3cbd6 100%);
         color: #111;
-        padding: 4rem 2rem;
-        border-radius: 16px;
-        margin-bottom: 3rem;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        border: 1px solid rgba(239, 191, 4, 0.1);
+        padding: 4rem 2rem 3rem;
+        border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+        margin-bottom: 1rem;
     }
 
     .artist-profile-content {
@@ -29,7 +27,7 @@
         border-radius: 50%;
         overflow: hidden;
         background: white;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        box-shadow: var(--shadow);
         border: 4px solid var(--gold);
         flex-shrink: 0;
         position: relative;
@@ -47,11 +45,11 @@
     }
 
     .artist-info h1 {
-        font-size: 3rem;
+        font-size: clamp(2.6rem, 5vw, 4rem);
         margin-bottom: 0.75rem;
         font-family: 'Elsie', serif;
         font-weight: 900;
-        letter-spacing: 0.02em;
+        letter-spacing: 0;
         color: #111;
     }
 
@@ -90,8 +88,23 @@
         max-width: 600px;
     }
 
+    .artist-certifications {
+        margin-top: 1rem;
+        color: #333;
+        line-height: 1.7;
+        max-width: 600px;
+    }
+
+    .artist-certifications strong {
+        color: #111;
+    }
+
+    .artist-actions {
+        margin-top: 1.5rem;
+    }
+
     .gallery-section {
-        margin-top: 4rem;
+        margin-top: 1rem;
     }
 
     .gallery-section h2 {
@@ -102,7 +115,7 @@
         border-bottom: 3px solid var(--gold);
         font-family: 'Elsie', serif;
         font-weight: 900;
-        letter-spacing: 0.02em;
+        letter-spacing: 0;
     }
 
     .artwork-card {
@@ -114,7 +127,7 @@
 
     .artwork-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        box-shadow: var(--shadow);
     }
 
     .artwork-card:hover .card-image {
@@ -208,6 +221,16 @@
             <div class="artist-bio">
                 {{ profile.bio|default:"Passionate artist creating authentic masterpieces." }}
             </div>
+            {% if profile.certifications %}
+            <div class="artist-certifications">
+                <strong>Certifications:</strong> {{ profile.certifications }}
+            </div>
+            {% endif %}
+            {% if request.user == artist %}
+            <div class="artist-actions">
+                <a href="{% url 'edit_artist_profile' %}" class="btn">Edit Profile</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -215,7 +238,7 @@
 <div class="grid">
     <div class="gallery-section">
         <h2>Gallery</h2>
-        <div class="grid grid-3">
+        <div class="grid grid-3" style="padding: 0;">
             {% for artwork in artworks %}
             <div class="card artwork-card" onclick="viewArtwork('{{ artwork.pk }}')">
                 <div class="card-image">
