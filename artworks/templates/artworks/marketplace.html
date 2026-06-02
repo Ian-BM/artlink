@@ -87,6 +87,38 @@
         text-align: center;
     }
 
+    .artwork-card {
+        position: relative;
+    }
+
+    .sold-badge {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        z-index: 2;
+        background: rgba(17, 17, 17, 0.88);
+        color: #fff;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .is-sold .card-image::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: rgba(17, 17, 17, 0.35);
+    }
+
+    .sold-note {
+        font-size: 0.86rem;
+        color: #777;
+    }
+
     @media (max-width: 768px) {
         .marketplace-page {
             padding: 2rem 1rem;
@@ -110,7 +142,10 @@
 
     <div class="marketplace-grid">
         {% for artwork in artworks %}
-        <article class="card artwork-card">
+        <article class="card artwork-card {% if artwork.status == 'sold' %}is-sold{% endif %}">
+            {% if artwork.status == 'sold' %}
+            <span class="sold-badge">Sold</span>
+            {% endif %}
             <a href="{% url 'artwork_detail' artwork.pk %}" class="card-image">
                 <img src="{% if artwork.images %}{{ artwork.images.url }}{% else %}https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artwork.title }}">
             </a>
@@ -119,7 +154,11 @@
                 <p class="artwork-artist">By <a href="{% url 'artist_profile' artwork.artist.pk %}">{{ artwork.artist.username }}</a></p>
                 <div class="marketplace-card-footer">
                     <p class="price">${{ artwork.price }}</p>
+                    {% if artwork.status == 'sold' %}
+                    <span class="sold-note">No longer available</span>
+                    {% else %}
                     <span class="auth-badge">Authentic</span>
+                    {% endif %}
                 </div>
             </div>
         </article>

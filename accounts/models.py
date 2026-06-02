@@ -15,6 +15,11 @@ class Profile(models.Model):
     # For artists
     total_artworks_sold = models.PositiveIntegerField(default=0)
     certifications = models.TextField(blank=True)  # JSON or text for badges
+    artist_statement = models.TextField(blank=True)
+    instagram_url = models.URLField(blank=True)
+    tiktok_url = models.URLField(blank=True)
+    facebook_url = models.URLField(blank=True)
+    website_url = models.URLField(blank=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.user_type}"

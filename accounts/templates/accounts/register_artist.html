@@ -57,16 +57,19 @@
     color:var(--text);
 }
 
-.form-group input{
+.form-group input,
+.form-group textarea{
     width:100%;
     padding:12px 14px;
     border:1px solid rgba(17,17,17,.16);
     border-radius:8px;
     font-size:14px;
     transition:all .2s ease;
+    font-family: inherit;
 }
 
-.form-group input:focus{
+.form-group input:focus,
+.form-group textarea:focus{
     outline:none;
     border-color:var(--gold);
     box-shadow:0 0 0 3px rgba(239,191,4,.16);
@@ -233,6 +236,62 @@ Join ArtLink and present your artwork to collectors around the world.
 Optional. This image will appear on your public artist profile.
 </p>
 
+</div>
+
+<div class="form-group">
+<label>Location</label>
+<input type="text" name="location" value="{{ form.location.value|default:'' }}" placeholder="City, Country">
+{% if form.location.errors %}
+<p class="error-text">{{ form.location.errors.0 }}</p>
+{% endif %}
+</div>
+
+<div class="form-group">
+<label>Artist Bio</label>
+<textarea name="bio" rows="3" placeholder="Who are you as an artist?">{{ form.bio.value|default:'' }}</textarea>
+{% if form.bio.errors %}
+<p class="error-text">{{ form.bio.errors.0 }}</p>
+{% endif %}
+</div>
+
+<div class="form-group">
+<label>Artist Statement</label>
+<textarea name="artist_statement" rows="4" placeholder="Your artistic vision, themes, and creative process...">{{ form.artist_statement.value|default:'' }}</textarea>
+{% if form.artist_statement.errors %}
+<p class="error-text">{{ form.artist_statement.errors.0 }}</p>
+{% endif %}
+</div>
+
+<div class="form-group">
+<label>Instagram URL</label>
+<input type="url" name="instagram_url" value="{{ form.instagram_url.value|default:'' }}" placeholder="https://instagram.com/your-handle">
+{% if form.instagram_url.errors %}
+<p class="error-text">{{ form.instagram_url.errors.0 }}</p>
+{% endif %}
+</div>
+
+<div class="form-group">
+<label>TikTok URL</label>
+<input type="url" name="tiktok_url" value="{{ form.tiktok_url.value|default:'' }}" placeholder="https://tiktok.com/@your-handle">
+{% if form.tiktok_url.errors %}
+<p class="error-text">{{ form.tiktok_url.errors.0 }}</p>
+{% endif %}
+</div>
+
+<div class="form-group">
+<label>Facebook URL</label>
+<input type="url" name="facebook_url" value="{{ form.facebook_url.value|default:'' }}" placeholder="https://facebook.com/your-page">
+{% if form.facebook_url.errors %}
+<p class="error-text">{{ form.facebook_url.errors.0 }}</p>
+{% endif %}
+</div>
+
+<div class="form-group">
+<label>Website URL</label>
+<input type="url" name="website_url" value="{{ form.website_url.value|default:'' }}" placeholder="https://yourwebsite.com">
+{% if form.website_url.errors %}
+<p class="error-text">{{ form.website_url.errors.0 }}</p>
+{% endif %}
 </div>
 
 

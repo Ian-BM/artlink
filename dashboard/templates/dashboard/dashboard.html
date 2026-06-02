@@ -245,6 +245,42 @@
         color: #721c24;
     }
 
+    .artwork-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .artwork-action-btn {
+        border: none;
+        border-radius: 6px;
+        padding: 0.4rem 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+    }
+
+    .artwork-action-btn:hover {
+        opacity: 0.85;
+    }
+
+    .artwork-action-edit {
+        background: #3498db;
+        color: #fff;
+    }
+
+    .artwork-action-delete {
+        background: #d9534f;
+        color: #fff;
+    }
+
+    .artwork-action-status {
+        background: #111;
+        color: #fff;
+    }
+
     @media (max-width: 768px) {
         .section-header {
             flex-direction: column;
@@ -330,6 +366,7 @@
                     <th>Price</th>
                     <th>Status</th>
                     <th>Certificate ID</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -346,6 +383,25 @@
                         </span>
                     </td>
                     <td style="font-family: monospace; font-size: 0.85rem;">{{ artwork.certificate.certificate_id }}</td>
+                    <td>
+                        <div class="artwork-actions">
+                            <a href="{% url 'edit_artwork' artwork.pk %}" class="artwork-action-btn artwork-action-edit">Edit</a>
+                            <form method="post" action="{% url 'toggle_artwork_status' artwork.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                                {% if artwork.status == 'available' %}
+                                <input type="hidden" name="status" value="sold">
+                                <button type="submit" class="artwork-action-btn artwork-action-status">Mark Sold</button>
+                                {% else %}
+                                <input type="hidden" name="status" value="available">
+                                <button type="submit" class="artwork-action-btn artwork-action-status">Mark Available</button>
+                                {% endif %}
+                            </form>
+                            <form method="post" action="{% url 'delete_artwork' artwork.pk %}" onsubmit="return confirm('Delete this artwork permanently?');" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="artwork-action-btn artwork-action-delete">Delete</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

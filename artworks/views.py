@@ -5,7 +5,7 @@ from accounts.models import Profile
 from django.contrib.auth.models import User
 
 def home(request):
-    featured_artworks = Artwork.objects.filter(status='available')[:6]
+    featured_artworks = Artwork.objects.select_related('artist').order_by('-created_at')[:6]
     featured_artists = Profile.objects.filter(user_type='artist')[:4]
     return render(request, 'artworks/home.html', {
         'featured_artworks': featured_artworks,
@@ -13,7 +13,7 @@ def home(request):
     })
 
 def marketplace(request):
-    artworks = Artwork.objects.filter(status='available')
+    artworks = Artwork.objects.select_related('artist').order_by('-created_at')
     # Add filtering logic here if needed
     return render(request, 'artworks/marketplace.html', {'artworks': artworks})
 
@@ -28,7 +28,7 @@ def artwork_detail(request, pk):
 def artist_profile(request, pk):
     artist = get_object_or_404(User, pk=pk)
     profile = get_object_or_404(Profile, user=artist)
-    artworks = Artwork.objects.filter(artist=artist, status='available')
+    artworks = Artwork.objects.filter(artist=artist).order_by('-created_at')
     return render(request, 'artworks/artist_profile.html', {
         'artist': artist,
         'profile': profile,

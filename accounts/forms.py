@@ -131,6 +131,19 @@ class ArtistRegistrationForm(forms.ModelForm):
         help_text="Upload a valid image file.",
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])],
     )
+    bio = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Share who you are as an artist...'}),
+    )
+    artist_statement = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe your artistic vision, inspiration, and creative process...'}),
+    )
+    location = forms.CharField(max_length=100, required=False)
+    instagram_url = forms.URLField(required=False, label="Instagram URL")
+    tiktok_url = forms.URLField(required=False, label="TikTok URL")
+    facebook_url = forms.URLField(required=False, label="Facebook URL")
+    website_url = forms.URLField(required=False, label="Website URL")
 
     class Meta:
         model = User
@@ -185,14 +198,24 @@ class ArtistProfileForm(forms.ModelForm):
             'last_name',
             'email',
             'bio',
+            'artist_statement',
             'location',
             'phone_number',
+            'instagram_url',
+            'tiktok_url',
+            'facebook_url',
+            'website_url',
             'profile_image',
             'certifications',
         )
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Tell collectors about your work, process, and story...'}),
+            'artist_statement': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Describe your artistic vision, themes, and inspiration...'}),
             'certifications': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Awards, exhibitions, training, or certifications...'}),
+            'instagram_url': forms.URLInput(attrs={'placeholder': 'https://instagram.com/your-handle'}),
+            'tiktok_url': forms.URLInput(attrs={'placeholder': 'https://tiktok.com/@your-handle'}),
+            'facebook_url': forms.URLInput(attrs={'placeholder': 'https://facebook.com/your-page'}),
+            'website_url': forms.URLInput(attrs={'placeholder': 'https://yourwebsite.com'}),
         }
 
     def __init__(self, *args, **kwargs):

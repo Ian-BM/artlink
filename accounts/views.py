@@ -22,6 +22,10 @@ class RoleBasedLoginView(LoginView):
     def get_default_redirect_url(self):
         return role_based_redirect_url(self.request.user)
 
+    def get_success_url(self):
+        redirect_to = self.get_redirect_url()
+        return redirect_to or role_based_redirect_url(self.request.user)
+
 def register_choice(request):
     return render(request, 'accounts/register_choice.html')
 
@@ -81,7 +85,14 @@ def register_artist(request):
             Profile.objects.create(
                 user=user,
                 user_type='artist',
-                profile_image=profile_picture if profile_picture else None
+                profile_image=profile_picture if profile_picture else None,
+                bio=form.cleaned_data.get('bio', ''),
+                artist_statement=form.cleaned_data.get('artist_statement', ''),
+                location=form.cleaned_data.get('location', ''),
+                instagram_url=form.cleaned_data.get('instagram_url', ''),
+                tiktok_url=form.cleaned_data.get('tiktok_url', ''),
+                facebook_url=form.cleaned_data.get('facebook_url', ''),
+                website_url=form.cleaned_data.get('website_url', ''),
             )
             login(request, user)
             messages.success(request, 'Artist account created successfully!')

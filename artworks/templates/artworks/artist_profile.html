@@ -4,257 +4,307 @@
 
 {% block content %}
 <style>
-    .artist-profile-header {
-        background: linear-gradient(135deg, #f4f2f3 0%, #c3cbd6 100%);
-        color: #111;
-        padding: 4rem 2rem 3rem;
-        border-bottom: 1px solid rgba(17, 17, 17, 0.08);
-        margin-bottom: 1rem;
-    }
-
-    .artist-profile-content {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 3rem;
-        align-items: center;
+    .artist-profile-page {
         max-width: 1200px;
         margin: 0 auto;
+        padding: 2.5rem 2rem 3.5rem;
+        display: grid;
+        gap: 2rem;
+    }
+
+    .artist-profile-card {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow-soft);
+        padding: 2rem;
+    }
+
+    .artist-profile-header {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 2rem;
+        align-items: center;
     }
 
     .artist-profile-image {
-        width: 240px;
-        height: 240px;
+        width: 220px;
+        height: 220px;
         border-radius: 50%;
         overflow: hidden;
-        background: white;
-        box-shadow: var(--shadow);
         border: 4px solid var(--gold);
-        flex-shrink: 0;
-        position: relative;
+        background: #fff;
+        box-shadow: var(--shadow-soft);
     }
 
     .artist-profile-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center;
     }
 
-    .artist-info {
-        color: #111;
-    }
-
-    .artist-info h1 {
-        font-size: clamp(2.6rem, 5vw, 4rem);
-        margin-bottom: 0.75rem;
+    .artist-name {
         font-family: 'Elsie', serif;
-        font-weight: 900;
-        letter-spacing: 0;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        line-height: 1;
+        margin: 0 0 0.75rem;
         color: #111;
     }
 
     .artist-meta {
         display: flex;
-        gap: 3rem;
-        margin: 1.5rem 0;
         flex-wrap: wrap;
+        gap: 0.8rem;
+        color: #444;
+        margin-bottom: 1rem;
     }
 
-    .artist-meta-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .artist-meta-label {
+    .meta-pill {
+        background: rgba(239, 191, 4, 0.1);
+        border: 1px solid rgba(239, 191, 4, 0.24);
+        color: #4a3710;
+        border-radius: 999px;
+        padding: 0.4rem 0.8rem;
         font-size: 0.9rem;
-        color: var(--muted);
         font-weight: 600;
+    }
+
+    .profile-section {
+        margin-top: 1.1rem;
+    }
+
+    .profile-section h2 {
+        font-size: 1.05rem;
+        letter-spacing: 0.04em;
+        color: #111;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        margin-bottom: 0.45rem;
     }
 
-    .artist-meta-value {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #111;
-    }
-
-    .artist-bio {
-        margin-top: 1.5rem;
+    .profile-section p {
+        color: #444;
         line-height: 1.8;
-        font-size: 1.1rem;
-        color: #333;
-        max-width: 600px;
     }
 
-    .artist-certifications {
-        margin-top: 1rem;
-        color: #333;
-        line-height: 1.7;
-        max-width: 600px;
+    .social-links {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.35rem;
     }
 
-    .artist-certifications strong {
+    .social-link {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 1px solid rgba(17, 17, 17, 0.14);
         color: #111;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .social-link:hover {
+        transform: translateY(-2px);
+        border-color: var(--gold);
+        box-shadow: 0 8px 20px rgba(17, 17, 17, 0.12);
+    }
+
+    .social-link svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
     }
 
     .artist-actions {
-        margin-top: 1.5rem;
-    }
-
-    .gallery-section {
         margin-top: 1rem;
     }
 
+    .gallery-section {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow-soft);
+        padding: 2rem;
+    }
+
     .gallery-section h2 {
-        font-size: 2.5rem;
-        color: #111;
-        margin-bottom: 2.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 3px solid var(--gold);
+        margin-bottom: 1.5rem;
         font-family: 'Elsie', serif;
-        font-weight: 900;
-        letter-spacing: 0;
+        font-size: clamp(1.9rem, 3vw, 2.5rem);
+        border-bottom: 3px solid var(--gold);
+        padding-bottom: 0.8rem;
     }
 
     .artwork-card {
-        cursor: pointer;
         position: relative;
         overflow: hidden;
-        transition: all 0.3s ease;
     }
 
-    .artwork-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow);
+    .sold-badge {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        z-index: 4;
+        background: rgba(17, 17, 17, 0.88);
+        color: #fff;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 
-    .artwork-card:hover .card-image {
-        transform: scale(1.05);
-    }
-
-    .artwork-card:hover::after {
-        opacity: 1;
-    }
-
-    .artwork-card::after {
+    .artwork-card.is-sold .card-image::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(239, 191, 4, 0.1);
-        opacity: 0;
-        transition: opacity 0.3s;
-        z-index: 1;
-    }
-
-    .card-image {
-        transition: transform 0.3s ease;
-    }
-
-    .artwork-card .card-content {
-        position: relative;
+        inset: 0;
+        background: rgba(17, 17, 17, 0.35);
         z-index: 2;
     }
 
-    .artwork-title {
-        font-weight: 600;
-        color: #111;
-        margin-bottom: 0.5rem;
-        font-size: 1.1rem;
+    .artwork-card.is-sold .price {
+        color: #888;
     }
 
-    .artwork-price {
-        font-weight: bold;
-        color: var(--gold);
-        font-size: 1.15rem;
+    .availability-note {
+        font-size: 0.86rem;
+        color: #666;
+        margin-top: 0.25rem;
     }
 
-    @media (max-width: 768px) {
-        .artist-profile-content {
+    .empty-gallery {
+        text-align: center;
+        color: #888;
+        padding: 2rem 1rem;
+    }
+
+    @media (max-width: 900px) {
+        .artist-profile-page {
+            padding: 1.4rem 1rem 2.2rem;
+        }
+
+        .artist-profile-header {
             grid-template-columns: 1fr;
-            gap: 2rem;
             text-align: center;
         }
 
         .artist-profile-image {
+            margin: 0 auto;
             width: 180px;
             height: 180px;
-            margin: 0 auto;
-        }
-
-        .artist-info h1 {
-            font-size: 2.2rem;
         }
 
         .artist-meta {
-            gap: 2rem;
             justify-content: center;
         }
 
-        .gallery-section h2 {
-            font-size: 2rem;
+        .social-links {
+            justify-content: center;
         }
     }
 </style>
 
-<div class="artist-profile-header">
-    <div class="artist-profile-content">
-        <div class="artist-profile-image">
-            <img src="{% if profile.profile_image %}{{ profile.profile_image.url }}{% else %}https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artist.username }}">
-        </div>
-        <div class="artist-info">
-            <h1>{{ artist.username }}</h1>
-            <div class="artist-meta">
-                <div class="artist-meta-item">
-                    <span class="artist-meta-label">Location</span>
-                    <span class="artist-meta-value">{{ profile.location|default:"Global" }}</span>
+<div class="artist-profile-page">
+    <section class="artist-profile-card">
+        <div class="artist-profile-header">
+            <div class="artist-profile-image">
+                <img src="{% if profile.profile_image %}{{ profile.profile_image.url }}{% else %}https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artist.username }}">
+            </div>
+            <div>
+                <h1 class="artist-name">{{ artist.username }}</h1>
+                <div class="artist-meta">
+                    <span class="meta-pill">{{ profile.location|default:"Global" }}</span>
+                    <span class="meta-pill">{{ profile.total_artworks_sold }} sold</span>
+                    <span class="meta-pill">{{ artworks|length }} listed</span>
                 </div>
-                <div class="artist-meta-item">
-                    <span class="artist-meta-label">Artworks Sold</span>
-                    <span class="artist-meta-value">{{ profile.total_artworks_sold }}</span>
-                </div>
-            </div>
-            <div class="artist-bio">
-                {{ profile.bio|default:"Passionate artist creating authentic masterpieces." }}
-            </div>
-            {% if profile.certifications %}
-            <div class="artist-certifications">
-                <strong>Certifications:</strong> {{ profile.certifications }}
-            </div>
-            {% endif %}
-            {% if request.user == artist %}
-            <div class="artist-actions">
-                <a href="{% url 'edit_artist_profile' %}" class="btn">Edit Profile</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
 
-<div class="grid">
-    <div class="gallery-section">
+                {% if profile.bio %}
+                <div class="profile-section">
+                    <h2>Artist Bio</h2>
+                    <p>{{ profile.bio }}</p>
+                </div>
+                {% endif %}
+
+                {% if profile.artist_statement %}
+                <div class="profile-section">
+                    <h2>Artist Statement</h2>
+                    <p>{{ profile.artist_statement }}</p>
+                </div>
+                {% endif %}
+
+                {% if profile.instagram_url or profile.tiktok_url or profile.facebook_url or profile.website_url %}
+                <div class="profile-section">
+                    <h2>Social Links</h2>
+                    <div class="social-links">
+                        {% if profile.instagram_url %}
+                        <a href="{{ profile.instagram_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.9A3.9 3.9 0 0 0 3.9 7.8v8.4a3.9 3.9 0 0 0 3.9 3.9h8.4a3.9 3.9 0 0 0 3.9-3.9V7.8a3.9 3.9 0 0 0-3.9-3.9H7.8zm8.9 1.4a1.2 1.2 0 1 1 0 2.3 1.2 1.2 0 0 1 0-2.3zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.9a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if profile.tiktok_url %}
+                        <a href="{{ profile.tiktok_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok">
+                            <svg viewBox="0 0 24 24"><path d="M14.5 3c.5 2.2 1.8 3.7 4 4v3.1a8 8 0 0 1-3.8-1v6.5a5.9 5.9 0 1 1-5.8-5.9h.4V13h-.4a2.6 2.6 0 1 0 2.5 2.6V3h3.1z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if profile.facebook_url %}
+                        <a href="{{ profile.facebook_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24"><path d="M13.8 8.6V6.8c0-.8.5-1 1-1h2V2.5h-3.3C10.4 2.5 9 4.4 9 7.2v1.4H6.5v3.6H9v9.3h4.1v-9.3h3.3l.5-3.6h-3.1z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if profile.website_url %}
+                        <a href="{{ profile.website_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Website">
+                            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm6.9 9h-3.1a15 15 0 0 0-1.1-5.2A8.1 8.1 0 0 1 18.9 11zM12 4.1c.9 1.1 1.8 3.5 2 6.9H10c.2-3.4 1.1-5.8 2-6.9zM4 13h3.1a15 15 0 0 0 1.1 5.2A8.1 8.1 0 0 1 4 13zm3.1-2H4a8.1 8.1 0 0 1 4.2-5.2A15 15 0 0 0 7.1 11zm2.9 0h4c-.2-3.6-1.1-6.1-2-7.4-.9 1.3-1.8 3.8-2 7.4zm0 2c.2 3.6 1.1 6.1 2 7.4.9-1.3 1.8-3.8 2-7.4h-4zm4.7 5.2c.5-1.2.9-3 1.1-5.2h3.1a8.1 8.1 0 0 1-4.2 5.2z"/></svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if profile.certifications %}
+                <div class="profile-section">
+                    <h2>Certifications</h2>
+                    <p>{{ profile.certifications }}</p>
+                </div>
+                {% endif %}
+
+                {% if request.user == artist %}
+                <div class="artist-actions">
+                    <a href="{% url 'edit_artist_profile' %}" class="btn">Edit Profile</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery-section">
         <h2>Gallery</h2>
         <div class="grid grid-3" style="padding: 0;">
             {% for artwork in artworks %}
-            <div class="card artwork-card" onclick="viewArtwork('{{ artwork.pk }}')">
+            <div class="card artwork-card {% if artwork.status == 'sold' %}is-sold{% endif %}" onclick="viewArtwork('{{ artwork.pk }}')">
+                {% if artwork.status == 'sold' %}
+                <span class="sold-badge">Sold</span>
+                {% endif %}
                 <div class="card-image">
                     <img src="{% if artwork.images %}{{ artwork.images.url }}{% else %}https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artwork.title }}">
                 </div>
                 <div class="card-content">
                     <div class="artwork-title">{{ artwork.title }}</div>
-                    <div class="artwork-price">${{ artwork.price }}</div>
+                    <div class="price">${{ artwork.price }}</div>
+                    {% if artwork.status == 'sold' %}
+                    <div class="availability-note">No longer available</div>
+                    {% endif %}
                     <span class="auth-badge">Authentic</span>
                 </div>
             </div>
             {% empty %}
-            <p style="grid-column: 1/-1; text-align: center; color: #999; padding: 2rem;">No artworks available yet.</p>
+            <p class="empty-gallery" style="grid-column: 1/-1;">No artworks listed yet.</p>
             {% endfor %}
         </div>
-    </div>
+    </section>
 </div>
 
 <script>

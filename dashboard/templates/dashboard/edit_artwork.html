@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Artwork - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+    .upload-container {
+        max-width: 700px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .upload-container h1 {
+        text-align: center;
+        color: #111;
+        margin-bottom: 1rem;
+        font-family: 'Elsie', serif;
+        font-size: 2.4rem;
+    }
+
+    .upload-intro {
+        text-align: center;
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.05rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid rgba(17, 17, 17, 0.16);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(239, 191, 4, 0.16);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .file-upload-wrapper {
+        position: relative;
+        border: 1px dashed rgba(17, 17, 17, 0.22);
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #f8f9fa;
+    }
+
+    .file-upload-wrapper:hover {
+        border-color: var(--gold);
+        background: rgba(239, 191, 4, 0.08);
+    }
+
+    .file-upload-wrapper input[type="file"] {
+        display: none;
+    }
+
+    .file-upload-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 64px;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(239, 191, 4, 0.14);
+        color: #111;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload-text {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    .file-name {
+        margin-top: 0.5rem;
+        color: var(--gold-dark);
+        font-weight: 600;
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.25rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background-color: var(--gold);
+        color: #111;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .submit-btn:hover {
+        background-color: var(--gold-dark);
+        transform: translateY(-2px);
+    }
+
+    .current-preview {
+        margin-top: 0.75rem;
+    }
+
+    .current-preview img {
+        width: 130px;
+        height: 130px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid rgba(17, 17, 17, 0.1);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1.25rem;
+        color: var(--gold-dark);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .upload-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="upload-container">
+    <a href="{% url 'dashboard' %}" class="back-link">&larr; Back to Dashboard</a>
+    <h1>Edit Artwork</h1>
+    <p class="upload-intro">Update your artwork details, image, and authenticity certificate from your artist dashboard.</p>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="title">Artwork Title</label>
+            <input type="text" id="title" name="title" required placeholder="e.g., Sunset Over Mountains" value="{{ form.title.value|default:'' }}">
+            {% if form.title.errors %}<small style="color: #e74c3c;">{{ form.title.errors.0 }}</small>{% endif %}
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="price">Price ($)</label>
+                <input type="number" id="price" name="price" required step="0.01" placeholder="1000" value="{{ form.price.value|default:'' }}">
+                {% if form.price.errors %}<small style="color: #e74c3c;">{{ form.price.errors.0 }}</small>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="year_created">Year Created</label>
+                <input type="number" id="year_created" name="year_created" required placeholder="2024" value="{{ form.year_created.value|default:'' }}">
+                {% if form.year_created.errors %}<small style="color: #e74c3c;">{{ form.year_created.errors.0 }}</small>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="medium">Medium</label>
+                <select id="medium" name="medium" required>
+                    <option value="">Select Medium</option>
+                    <option value="oil" {% if form.medium.value == 'oil' %}selected{% endif %}>Oil</option>
+                    <option value="acrylic" {% if form.medium.value == 'acrylic' %}selected{% endif %}>Acrylic</option>
+                    <option value="watercolor" {% if form.medium.value == 'watercolor' %}selected{% endif %}>Watercolor</option>
+                    <option value="mixed" {% if form.medium.value == 'mixed' %}selected{% endif %}>Mixed Media</option>
+                    <option value="other" {% if form.medium.value == 'other' %}selected{% endif %}>Other</option>
+                </select>
+                {% if form.medium.errors %}<small style="color: #e74c3c;">{{ form.medium.errors.0 }}</small>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="size">Size</label>
+                <input type="text" id="size" name="size" required placeholder="e.g., 24x30 inches" value="{{ form.size.value|default:'' }}">
+                {% if form.size.errors %}<small style="color: #e74c3c;">{{ form.size.errors.0 }}</small>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" required placeholder="Describe your artwork, its inspiration, story, and technical details...">{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}<small style="color: #e74c3c;">{{ form.description.errors.0 }}</small>{% endif %}
+            <small class="help-text">Be detailed so collectors understand your work clearly.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="images">Replace Artwork Image (optional)</label>
+            <div class="file-upload-wrapper" onclick="document.getElementById('images').click();">
+                <div class="file-upload-icon">Image</div>
+                <div class="file-upload-text">Click or drag a new image here</div>
+                <input type="file" id="images" name="images" accept="image/*">
+                <div class="file-name" id="imageName"></div>
+            </div>
+            {% if form.images.errors %}<small style="color: #e74c3c;">{{ form.images.errors.0 }}</small>{% endif %}
+            {% if artwork.images %}
+            <div class="current-preview">
+                <small class="help-text">Current image:</small><br>
+                <img src="{{ artwork.images.url }}" alt="{{ artwork.title }}">
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="certificate_pdf">Replace Certificate of Authenticity (PDF, optional)</label>
+            <div class="file-upload-wrapper" onclick="document.getElementById('certificate_pdf').click();">
+                <div class="file-upload-icon">PDF</div>
+                <div class="file-upload-text">Click or drag a new PDF here</div>
+                <input type="file" id="certificate_pdf" name="certificate_pdf" accept=".pdf">
+                <div class="file-name" id="certificateName"></div>
+            </div>
+            <small class="help-text">
+                {% if certificate and certificate.certificate_pdf %}
+                Current certificate: {{ certificate.certificate_pdf.name }}
+                {% else %}
+                No certificate uploaded yet.
+                {% endif %}
+            </small>
+        </div>
+
+        <button type="submit" class="submit-btn">Save Changes</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('images').addEventListener('change', function(e) {
+    document.getElementById('imageName').textContent = e.target.files[0]?.name || '';
+});
+
+document.getElementById('certificate_pdf').addEventListener('change', function(e) {
+    document.getElementById('certificateName').textContent = e.target.files[0]?.name || '';
+});
+</script>
+{% endblock %}

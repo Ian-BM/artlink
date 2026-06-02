@@ -169,9 +169,49 @@
             </div>
 
             <div class="form-group full-width">
+                <label for="{{ form.artist_statement.id_for_label }}">Artist Statement</label>
+                {{ form.artist_statement }}
+                {% for error in form.artist_statement.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
                 <label for="{{ form.certifications.id_for_label }}">Certifications</label>
                 {{ form.certifications }}
                 {% for error in form.certifications.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.instagram_url.id_for_label }}">Instagram URL</label>
+                {{ form.instagram_url }}
+                {% for error in form.instagram_url.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.tiktok_url.id_for_label }}">TikTok URL</label>
+                {{ form.tiktok_url }}
+                {% for error in form.tiktok_url.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.facebook_url.id_for_label }}">Facebook URL</label>
+                {{ form.facebook_url }}
+                {% for error in form.facebook_url.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.website_url.id_for_label }}">Website URL</label>
+                {{ form.website_url }}
+                {% for error in form.website_url.errors %}
                 <p class="field-error">{{ error }}</p>
                 {% endfor %}
             </div>

@@ -29,7 +29,9 @@
                 <h3><a href="{% url 'artwork_detail' artwork.pk %}">{{ artwork.title }}</a></h3>
                 <p class="artist-meta"><a href="{% url 'artist_profile' artwork.artist.pk %}">{{ artwork.artist.username }}</a></p>
                 <p class="price">${{ artwork.price }}</p>
-                <span class="availability-badge">{{ artwork.status|capfirst }}</span>
+                <span class="availability-badge {% if artwork.status == 'sold' %}sold{% endif %}">
+                    {% if artwork.status == 'sold' %}Sold{% else %}Available{% endif %}
+                </span>
             </div>
         </div>
         {% endfor %}

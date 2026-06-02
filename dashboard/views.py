@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from artworks.models import Artwork, Certificate
 from .models import Inquiry
 from .forms import ArtworkForm, InquiryForm
@@ -57,6 +58,72 @@ def upload_artwork(request):
     else:
         form = ArtworkForm()
     return render(request, 'dashboard/upload.html', {'form': form})
+
+@login_required
+def edit_artwork(request, artwork_id):
+    if not user_is_artist(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+
+    artwork = get_object_or_404(Artwork, pk=artwork_id, artist=request.user)
+
+    if request.method == 'POST':
+        form = ArtworkForm(request.POST, request.FILES, instance=artwork)
+        if form.is_valid():
+            updated_artwork = form.save()
+            cert_pdf = request.FILES.get('certificate_pdf')
+            certificate, _ = Certificate.objects.get_or_create(artwork=updated_artwork)
+            if cert_pdf:
+                certificate.certificate_pdf = cert_pdf
+                certificate.save()
+            messages.success(request, 'Artwork updated successfully!')
+            return redirect('dashboard')
+    else:
+        form = ArtworkForm(instance=artwork)
+
+    certificate = getattr(artwork, 'certificate', None)
+    return render(request, 'dashboard/edit_artwork.html', {
+        'form': form,
+        'artwork': artwork,
+        'certificate': certificate,
+    })
+
+@login_required
+@require_POST
+def delete_artwork(request, artwork_id):
+    if not user_is_artist(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+
+    artwork = get_object_or_404(Artwork, pk=artwork_id, artist=request.user)
+    artwork.delete()
+    messages.success(request, 'Artwork deleted successfully.')
+    return redirect('dashboard')
+
+@login_required
+@require_POST
+def toggle_artwork_status(request, artwork_id):
+    if not user_is_artist(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+
+    artwork = get_object_or_404(Artwork, pk=artwork_id, artist=request.user)
+    next_status = request.POST.get('status')
+    if next_status not in {'available', 'sold'}:
+        messages.error(request, 'Invalid status update.')
+        return redirect('dashboard')
+
+    artwork.status = next_status
+    artwork.save(update_fields=['status', 'updated_at'])
+
+    sold_count = Artwork.objects.filter(artist=request.user, status='sold').count()
+    profile = request.user.profile
+    if profile.total_artworks_sold != sold_count:
+        profile.total_artworks_sold = sold_count
+        profile.save(update_fields=['total_artworks_sold'])
+
+    messages.success(request, f'"{artwork.title}" is now marked as {artwork.get_status_display().lower()}.')
+    return redirect('dashboard')
 
 @login_required
 def inquiry_inbox(request):

@@ -375,6 +375,12 @@ footer p {
     margin-top: 0.5rem;
 }
 
+.availability-badge.sold {
+    background: rgba(17, 17, 17, 0.85);
+    color: #fff;
+    border: 1px solid rgba(17, 17, 17, 0.9);
+}
+
 .artist-row {
     display: grid;
     grid-auto-flow: column;
@@ -741,6 +747,7 @@ menu.classList.toggle("active");
 
                     {% if user.profile.user_type == 'artist' %}
                     <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'artist_inquiries' %}">Inquiries</a></li>
                     <li><a href="{% url 'edit_artist_profile' %}">Edit Profile</a></li>
                     {% endif %}
 
