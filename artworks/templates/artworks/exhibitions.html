@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Exhibitions - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+    .exhibitions-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .exhibitions-hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 2rem;
+        align-items: stretch;
+        margin-bottom: 3rem;
+    }
+
+    .exhibitions-copy,
+    .featured-exhibition {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        padding: 2rem;
+    }
+
+    .exhibitions-copy h1 {
+        font-family: 'Elsie', serif;
+        font-size: clamp(2.8rem, 5vw, 4.4rem);
+        line-height: 1;
+        color: #111;
+        margin-bottom: 1rem;
+    }
+
+    .exhibitions-copy p,
+    .featured-exhibition p {
+        color: var(--muted);
+        line-height: 1.8;
+    }
+
+    .featured-exhibition img,
+    .exhibition-card img {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #111;
+        margin-bottom: 1rem;
+    }
+
+    .featured-exhibition h2,
+    .exhibition-section h2 {
+        font-family: 'Elsie', serif;
+        color: #111;
+        line-height: 1;
+    }
+
+    .exhibition-section {
+        margin-top: 3rem;
+    }
+
+    .exhibition-section-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: end;
+        border-bottom: 3px solid var(--gold);
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .exhibition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .exhibition-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        padding: 1rem;
+    }
+
+    .exhibition-card h3 {
+        margin-bottom: 0.4rem;
+    }
+
+    .exhibition-meta {
+        color: #666;
+        font-weight: 600;
+        font-size: 0.92rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-exhibition {
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 850px) {
+        .exhibitions-page {
+            padding: 2rem 1rem;
+        }
+
+        .exhibitions-hero,
+        .exhibition-section-header {
+            grid-template-columns: 1fr;
+            display: grid;
+            align-items: start;
+        }
+    }
+</style>
+
+<div class="exhibitions-page">
+    <section class="exhibitions-hero">
+        <div class="exhibitions-copy">
+            <h1>Online Exhibitions</h1>
+            <p>Curated rooms for collectors, artists, and new audiences. Explore focused presentations and enter immersive gallery spaces from anywhere.</p>
+        </div>
+
+        <aside class="featured-exhibition">
+            {% if featured_exhibition %}
+            {% if featured_exhibition.cover_image %}
+            <img src="{{ featured_exhibition.cover_image.url }}" alt="{{ featured_exhibition.title }}">
+            {% endif %}
+            <h2>{{ featured_exhibition.title }}</h2>
+            <p>{{ featured_exhibition.description|truncatewords:28 }}</p>
+            <a href="{% url 'exhibition_detail' featured_exhibition.slug %}" class="btn">View Featured Exhibition</a>
+            {% else %}
+            <h2>Featured Exhibition</h2>
+            <p>No featured exhibition has been curated yet.</p>
+            {% endif %}
+        </aside>
+    </section>
+
+    <section class="exhibition-section">
+        <div class="exhibition-section-header">
+            <h2>Current Exhibitions</h2>
+            <p>{{ current_exhibitions|length }} currently open</p>
+        </div>
+        <div class="exhibition-grid">
+            {% for exhibition in current_exhibitions %}
+            <article class="exhibition-card">
+                {% if exhibition.cover_image %}
+                <img src="{{ exhibition.cover_image.url }}" alt="{{ exhibition.title }}">
+                {% endif %}
+                <h3><a href="{% url 'exhibition_detail' exhibition.slug %}">{{ exhibition.title }}</a></h3>
+                <div class="exhibition-meta">Curated by {{ exhibition.curator_name }} · {{ exhibition.start_date|date:"M d" }} - {{ exhibition.end_date|date:"M d, Y" }}</div>
+                <p>{{ exhibition.description|truncatewords:24 }}</p>
+            </article>
+            {% empty %}
+            <div class="empty-exhibition">No current exhibitions are open yet.</div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="exhibition-section">
+        <div class="exhibition-section-header">
+            <h2>Past Exhibitions</h2>
+            <p>Archive</p>
+        </div>
+        <div class="exhibition-grid">
+            {% for exhibition in past_exhibitions %}
+            <article class="exhibition-card">
+                {% if exhibition.cover_image %}
+                <img src="{{ exhibition.cover_image.url }}" alt="{{ exhibition.title }}">
+                {% endif %}
+                <h3><a href="{% url 'exhibition_detail' exhibition.slug %}">{{ exhibition.title }}</a></h3>
+                <div class="exhibition-meta">Curated by {{ exhibition.curator_name }} · Ended {{ exhibition.end_date|date:"M d, Y" }}</div>
+                <p>{{ exhibition.description|truncatewords:24 }}</p>
+            </article>
+            {% empty %}
+            <div class="empty-exhibition">Past exhibitions will appear here.</div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

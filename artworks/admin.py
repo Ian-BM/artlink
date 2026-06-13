@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Artwork, Certificate
+from .models import Artwork, Certificate, Exhibition
 
 @admin.register(Artwork)
 class ArtworkAdmin(admin.ModelAdmin):
@@ -12,3 +12,13 @@ class ArtworkAdmin(admin.ModelAdmin):
 class CertificateAdmin(admin.ModelAdmin):
     list_display = ('certificate_id', 'artwork', 'issued_at')
     search_fields = ('certificate_id', 'artwork__title')
+
+
+@admin.register(Exhibition)
+class ExhibitionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'curator_name', 'start_date', 'end_date', 'featured')
+    list_filter = ('featured', 'start_date', 'end_date')
+    search_fields = ('title', 'curator_name', 'description')
+    prepopulated_fields = {'slug': ('title',)}
+    filter_horizontal = ('artworks',)
+    readonly_fields = ('created_at',)

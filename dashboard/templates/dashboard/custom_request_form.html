@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Custom Artwork - ArtLink{% endblock %}
+
+{% block content %}
+<style>
+    .custom-request-page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .request-artist-card,
+    .custom-request-form {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-soft);
+        padding: 2rem;
+    }
+
+    .request-artist-card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--gold);
+        margin-bottom: 1rem;
+    }
+
+    .request-artist-card h1,
+    .custom-request-form h2 {
+        font-family: 'Elsie', serif;
+        line-height: 1;
+        color: #111;
+        margin-bottom: 0.8rem;
+    }
+
+    .request-artist-card p {
+        color: var(--muted);
+        line-height: 1.8;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .custom-request-form input,
+    .custom-request-form select,
+    .custom-request-form textarea {
+        width: 100%;
+    }
+
+    .field-error {
+        color: #721c24;
+        font-size: 0.9rem;
+        margin-top: 0.35rem;
+    }
+
+    .request-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    @media (max-width: 820px) {
+        .custom-request-page {
+            grid-template-columns: 1fr;
+            padding: 2rem 1rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="custom-request-page">
+    <aside class="request-artist-card">
+        <img src="{% if profile.profile_image %}{{ profile.profile_image.url }}{% else %}https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80{% endif %}" alt="{{ artist.username }}">
+        <h1>{{ artist.username }}</h1>
+        <p>{{ profile.bio|default:"Share a custom commission brief and the artist will contact you directly." }}</p>
+        <a href="{% url 'artist_profile' artist.pk %}" class="btn btn-secondary">View Artist Profile</a>
+    </aside>
+
+    <form method="post" enctype="multipart/form-data" class="custom-request-form">
+        {% csrf_token %}
+        <h2>Request Custom Artwork</h2>
+        <p style="color: var(--muted); margin-bottom: 1.5rem;">Send a focused brief. The artist will reply through email or WhatsApp.</p>
+
+        <div class="form-grid">
+            {% for field in form %}
+            <div class="form-group {% if field.name == 'description' or field.name == 'reference_image' %}full-width{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="request-actions">
+            <button type="submit" class="btn">Submit Request</button>
+            <a href="{% url 'artist_profile' artist.pk %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -742,12 +742,14 @@ menu.classList.toggle("active");
 
                 <li><a href="{% url 'marketplace' %}">Marketplace</a></li>
                 <li><a href="{% url 'artists' %}">Artists</a></li>
+                <li><a href="{% url 'exhibitions' %}">Exhibitions</a></li>
 
                 {% if user.is_authenticated %}
 
                     {% if user.profile.user_type == 'artist' %}
                     <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
                     <li><a href="{% url 'artist_inquiries' %}">Inquiries</a></li>
+                    <li><a href="{% url 'custom_request_inbox' %}">Custom Requests</a></li>
                     <li><a href="{% url 'edit_artist_profile' %}">Edit Profile</a></li>
                     {% endif %}
 

@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from artworks.models import Artwork, Certificate
-from .models import Inquiry
-from .forms import ArtworkForm, InquiryForm
+from accounts.models import Profile
+from .models import Inquiry, CustomArtworkRequest
+from .forms import ArtworkForm, InquiryForm, CustomArtworkRequestForm, CustomArtworkRequestStatusForm
 
 
 def user_is_artist(user):
@@ -26,13 +28,16 @@ def artist_dashboard(request):
     total_sold = artworks.filter(status='sold').count()
     active_listings = artworks.filter(status='available').count()
     inquiries = Inquiry.objects.filter(artwork__artist=request.user).order_by('-created_at')
+    custom_requests = CustomArtworkRequest.objects.filter(artist=request.user).order_by('-created_at')
     return render(request, 'dashboard/dashboard.html', {
         'total_uploaded': total_uploaded,
         'total_sold': total_sold,
         'active_listings': active_listings,
         'inquiries_count': inquiries.count(),
+        'custom_requests_count': custom_requests.count(),
         'artworks': artworks,
         'inquiries': inquiries,
+        'custom_requests': custom_requests[:3],
     })
 
 @login_required
@@ -132,6 +137,62 @@ def inquiry_inbox(request):
         return redirect('home')
     inquiries = Inquiry.objects.filter(artwork__artist=request.user).order_by('-created_at')
     return render(request, 'dashboard/inquiries.html', {'inquiries': inquiries})
+
+
+def request_custom_artwork(request, artist_id):
+    artist = get_object_or_404(User, pk=artist_id, profile__user_type='artist')
+    profile = get_object_or_404(Profile, user=artist)
+
+    initial = {}
+    if request.user.is_authenticated:
+        initial = {
+            'buyer_name': request.user.get_full_name() or request.user.username,
+            'buyer_email': request.user.email,
+            'buyer_whatsapp': getattr(request.user.profile, 'phone_number', '') if hasattr(request.user, 'profile') else '',
+        }
+
+    if request.method == 'POST':
+        form = CustomArtworkRequestForm(request.POST, request.FILES)
+        if form.is_valid():
+            custom_request = form.save(commit=False)
+            custom_request.artist = artist
+            custom_request.save()
+            messages.success(request, 'Your custom artwork request has been sent. The artist will contact you directly.')
+            return redirect('artist_profile', pk=artist.pk)
+    else:
+        form = CustomArtworkRequestForm(initial=initial)
+
+    return render(request, 'dashboard/custom_request_form.html', {
+        'form': form,
+        'artist': artist,
+        'profile': profile,
+    })
+
+
+@login_required
+def custom_request_inbox(request):
+    if not user_is_artist(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+    custom_requests = CustomArtworkRequest.objects.filter(artist=request.user).order_by('-created_at')
+    return render(request, 'dashboard/custom_requests.html', {'custom_requests': custom_requests})
+
+
+@login_required
+@require_POST
+def update_custom_request_status(request, request_id):
+    if not user_is_artist(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+
+    custom_request = get_object_or_404(CustomArtworkRequest, pk=request_id, artist=request.user)
+    form = CustomArtworkRequestStatusForm(request.POST, instance=custom_request)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Custom request status updated.')
+    else:
+        messages.error(request, 'Invalid custom request status.')
+    return redirect('custom_request_inbox')
 
 @login_required
 def send_inquiry(request, artwork_id):

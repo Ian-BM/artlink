@@ -344,18 +344,27 @@
                 <div class="metric-label">Buyer Inquiries</div>
             </a>
         </div>
+        <div class="metric-card">
+            <a href="{% url 'custom_request_inbox' %}" style="text-decoration: none; color: inherit;">
+                <div class="metric-value">{{ custom_requests_count }}</div>
+                <div class="metric-label">Custom Requests</div>
+            </a>
+        </div>
     </div>
 
     <!-- Upload Artwork Section -->
     <div class="section-header">
         <h2>Your Artworks</h2>
         <div class="dashboard-actions">
+            <a href="#artworks" class="upload-btn">Artworks</a>
             <a href="{% url 'artist_inquiries' %}" class="upload-btn">Inquiries</a>
+            <a href="{% url 'custom_request_inbox' %}" class="upload-btn">Custom Requests</a>
             <a href="{% url 'edit_artist_profile' %}" class="upload-btn">Edit Profile</a>
             <a href="{% url 'upload_artwork' %}" class="upload-btn">+ Upload New Artwork</a>
         </div>
     </div>
 
+    <div id="artworks"></div>
     {% if artworks %}
     <div class="table-container">
         <table>
@@ -410,6 +419,41 @@
     {% else %}
     <div class="empty-state">
         <p>You haven't uploaded any artworks yet. <a href="{% url 'upload_artwork' %}" style="color: var(--gold);">Start uploading</a></p>
+    </div>
+    {% endif %}
+
+    {% if custom_requests %}
+    <div class="inquiries-section">
+        <div class="section-header">
+            <h2>Custom Requests</h2>
+            <a href="{% url 'custom_request_inbox' %}" class="upload-btn">View All</a>
+        </div>
+
+        {% for custom_request in custom_requests %}
+        <div class="inquiry-card">
+            <div class="inquiry-header">
+                <div>
+                    <div class="inquiry-buyer">{{ custom_request.buyer_name }}</div>
+                    <div class="inquiry-artwork">{{ custom_request.get_artwork_type_display }} · Budget ${{ custom_request.budget }}</div>
+                    <div class="inquiry-time">{{ custom_request.created_at|date:"F d, Y H:i" }}</div>
+                </div>
+                <div class="inquiry-meta">
+                    <span class="inquiry-status">{{ custom_request.get_status_display }}</span>
+                </div>
+            </div>
+
+            <div class="inquiry-message">
+                {{ custom_request.description|truncatewords:36 }}
+            </div>
+
+            <div class="inquiry-actions">
+                <a href="mailto:{{ custom_request.buyer_email }}" class="inquiry-btn inquiry-btn-reply">Reply via Email</a>
+                {% if custom_request.whatsapp_url %}
+                <a href="{{ custom_request.whatsapp_url }}" target="_blank" class="inquiry-btn inquiry-btn-whatsapp">WhatsApp</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
     {% endif %}
 

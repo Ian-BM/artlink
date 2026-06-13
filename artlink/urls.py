@@ -27,6 +27,7 @@ urlpatterns = [
     path('', include('artworks.urls')),
     path('accounts/', include('accounts.urls')),
     path('artist/inquiries/', dashboard_views.inquiry_inbox, name='artist_inquiries'),
+    path('artist/<int:artist_id>/custom-request/', dashboard_views.request_custom_artwork, name='request_custom_artwork'),
     path('dashboard/', include('dashboard.urls')),
 ]
 

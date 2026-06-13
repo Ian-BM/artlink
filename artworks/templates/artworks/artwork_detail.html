@@ -404,6 +404,7 @@
                 {% else %}
                 <button class="btn btn-primary" onclick="openContactModal()">Contact Artist</button>
                 {% endif %}
+                <a href="{% url 'request_custom_artwork' artwork.artist.pk %}" class="btn btn-secondary">Request Custom Artwork</a>
                 <a href="{% url 'verify_certificate' %}" class="btn btn-secondary">Verify Authenticity</a>
                 {% if artwork.artist.profile.phone_number and artwork.status != 'sold' %}
                 <a href="https://wa.me/{{ artwork.artist.profile.phone_number|cut:' '|cut:'+' }}" target="_blank" rel="noopener" class="btn btn-secondary">WhatsApp</a>

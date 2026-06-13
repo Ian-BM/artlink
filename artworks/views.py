@@ -1,6 +1,8 @@
 import re
 from django.shortcuts import render, get_object_or_404
-from .models import Artwork, Certificate
+from django.urls import reverse
+from django.utils import timezone
+from .models import Artwork, Certificate, Exhibition
 from accounts.models import Profile
 from django.contrib.auth.models import User
 
@@ -58,4 +60,62 @@ def verify_certificate(request):
     return render(request, 'artworks/verify.html', {
         'certificate': certificate,
         'certificate_status': certificate_status,
+    })
+
+
+def exhibitions_home(request):
+    today = timezone.localdate()
+    exhibitions = Exhibition.objects.prefetch_related('artworks')
+    featured_exhibition = exhibitions.filter(featured=True).first()
+    current_exhibitions = exhibitions.filter(start_date__lte=today, end_date__gte=today)
+    past_exhibitions = exhibitions.filter(end_date__lt=today)
+    return render(request, 'artworks/exhibitions.html', {
+        'featured_exhibition': featured_exhibition,
+        'current_exhibitions': current_exhibitions,
+        'past_exhibitions': past_exhibitions,
+    })
+
+
+def exhibition_detail(request, slug):
+    exhibition = get_object_or_404(
+        Exhibition.objects.prefetch_related('artworks__artist__profile'),
+        slug=slug,
+    )
+    artworks = exhibition.artworks.select_related('artist', 'artist__profile').all()
+    return render(request, 'artworks/exhibition_detail.html', {
+        'exhibition': exhibition,
+        'artworks': artworks,
+    })
+
+
+def exhibition_gallery(request, slug):
+    exhibition = get_object_or_404(
+        Exhibition.objects.prefetch_related('artworks__artist__profile'),
+        slug=slug,
+    )
+    artworks = exhibition.artworks.select_related('artist', 'artist__profile').all()
+    artwork_data = []
+    for artwork in artworks:
+        image_url = ''
+        if artwork.images:
+            image_url = request.build_absolute_uri(artwork.images.url)
+        profile = getattr(artwork.artist, 'profile', None)
+        artwork_data.append({
+            'id': artwork.pk,
+            'title': artwork.title,
+            'artist': artwork.artist.username,
+            'artistProfileUrl': reverse('artist_profile', kwargs={'pk': artwork.artist.pk}),
+            'price': str(artwork.price),
+            'description': artwork.description,
+            'artistStatement': profile.artist_statement if profile else '',
+            'medium': artwork.get_medium_display(),
+            'dimensions': artwork.size,
+            'availability': artwork.get_status_display(),
+            'imageUrl': image_url,
+            'detailUrl': reverse('artwork_detail', kwargs={'pk': artwork.pk}),
+        })
+    return render(request, 'artworks/exhibition_gallery.html', {
+        'exhibition': exhibition,
+        'artworks': artworks,
+        'artwork_data': artwork_data,
     })

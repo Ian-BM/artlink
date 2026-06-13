@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+
+{% block title %}Virtual Gallery - {{ exhibition.title }}{% endblock %}
+
+{% block content %}
+<style>
+    main {
+        min-height: 0;
+    }
+
+    .gallery-shell {
+        position: relative;
+        min-height: calc(100vh - 82px);
+        background: #111;
+        overflow: hidden;
+    }
+
+    #galleryCanvas {
+        width: 100%;
+        height: calc(100vh - 82px);
+        display: block;
+        touch-action: none;
+    }
+
+    .gallery-topbar {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        z-index: 4;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        pointer-events: none;
+    }
+
+    .gallery-title-panel,
+    .gallery-controls-panel,
+    .artwork-overlay {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 8px;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.22);
+        backdrop-filter: blur(16px);
+        pointer-events: auto;
+    }
+
+    .gallery-title-panel {
+        padding: 1rem 1.2rem;
+        max-width: 460px;
+    }
+
+    .gallery-title-panel h1 {
+        font-family: 'Elsie', serif;
+        color: #111;
+        line-height: 1;
+        margin: 0 0 0.35rem;
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+    }
+
+    .gallery-title-panel p {
+        color: #555;
+        margin: 0;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    .gallery-controls-panel {
+        padding: 0.75rem;
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        justify-content: end;
+    }
+
+    .gallery-controls-panel a,
+    .gallery-controls-panel button {
+        border: 1px solid rgba(17,17,17,0.16);
+        background: #fff;
+        color: #111;
+        border-radius: 8px;
+        padding: 0.6rem 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .gallery-controls-panel a:hover,
+    .gallery-controls-panel button:hover {
+        border-color: var(--gold);
+        background: rgba(239, 191, 4, 0.1);
+    }
+
+    .artwork-overlay {
+        position: absolute;
+        right: 1rem;
+        bottom: 1rem;
+        width: min(420px, calc(100% - 2rem));
+        z-index: 5;
+        padding: 1.25rem;
+        display: none;
+    }
+
+    .artwork-overlay.is-open {
+        display: block;
+    }
+
+    .artwork-overlay h2 {
+        font-family: 'Elsie', serif;
+        color: #111;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .overlay-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        color: #555;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+    }
+
+    .overlay-description {
+        color: #444;
+        line-height: 1.7;
+        max-height: 170px;
+        overflow: auto;
+        padding-right: 0.25rem;
+    }
+
+    .overlay-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .close-overlay {
+        position: absolute;
+        top: 0.6rem;
+        right: 0.75rem;
+        border: none;
+        background: transparent;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #555;
+    }
+
+    .gallery-empty {
+        color: #fff;
+        min-height: 70vh;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    @media (max-width: 780px) {
+        #galleryCanvas {
+            height: calc(100vh - 74px);
+        }
+
+        .gallery-shell {
+            min-height: calc(100vh - 74px);
+        }
+
+        .gallery-topbar {
+            display: grid;
+        }
+
+        .gallery-title-panel {
+            max-width: none;
+        }
+
+        .gallery-controls-panel {
+            justify-content: start;
+        }
+
+        .artwork-overlay {
+            left: 1rem;
+            right: 1rem;
+            bottom: 1rem;
+            width: auto;
+        }
+    }
+</style>
+
+{{ artwork_data|json_script:"gallery-artworks" }}
+
+<div class="gallery-shell">
+    {% if artworks %}
+    <canvas id="galleryCanvas"></canvas>
+    <div class="gallery-topbar">
+        <div class="gallery-title-panel">
+            <h1>{{ exhibition.title }}</h1>
+            <p>Drag to look around, scroll or pinch to move, and click an artwork to inspect it.</p>
+        </div>
+        <div class="gallery-controls-panel">
+            <a href="{% url 'exhibition_detail' exhibition.slug %}">Exhibition</a>
+            <button type="button" id="resetCamera">Reset View</button>
+        </div>
+    </div>
+
+    <aside class="artwork-overlay" id="artworkOverlay" aria-live="polite">
+        <button class="close-overlay" type="button" id="closeOverlay" aria-label="Close artwork details">&times;</button>
+        <h2 id="overlayTitle"></h2>
+        <p><a id="overlayArtist" href="#"></a></p>
+        <div class="overlay-meta">
+            <div><strong>Price</strong><br><span id="overlayPrice"></span></div>
+            <div><strong>Status</strong><br><span id="overlayAvailability"></span></div>
+            <div><strong>Medium</strong><br><span id="overlayMedium"></span></div>
+            <div><strong>Dimensions</strong><br><span id="overlayDimensions"></span></div>
+        </div>
+        <div class="overlay-description" id="overlayDescription"></div>
+        <div class="overlay-actions">
+            <a class="btn" id="overlayArtworkLink" href="#">View Artwork</a>
+            <a class="btn btn-secondary" id="overlayArtistLink" href="#">Artist Profile</a>
+        </div>
+    </aside>
+    {% else %}
+    <div class="gallery-empty">
+        <div>
+            <h1>No artworks in this gallery yet.</h1>
+            <p>Return to the exhibition page while the collection is being installed.</p>
+            <a href="{% url 'exhibition_detail' exhibition.slug %}" class="btn">Back to Exhibition</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if artworks %}
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const artworks = JSON.parse(document.getElementById('gallery-artworks').textContent);
+const canvas = document.getElementById('galleryCanvas');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x111111);
+scene.fog = new THREE.Fog(0x111111, 12, 36);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 100);
+camera.position.set(0, 2.3, 8.5);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.target.set(0, 1.5, 0);
+controls.maxPolarAngle = Math.PI * 0.48;
+controls.minDistance = 3.2;
+controls.maxDistance = 15;
+controls.enablePan = true;
+
+const room = new THREE.Group();
+scene.add(room);
+
+const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xd8d2c8, roughness: 0.78, metalness: 0.05 });
+const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xf4f2f3, roughness: 0.9 });
+const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.45 });
+
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), floorMaterial);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+room.add(floor);
+
+function makeWall(width, height, x, y, z, rotY = 0) {
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial);
+    wall.position.set(x, y, z);
+    wall.rotation.y = rotY;
+    room.add(wall);
+}
+
+makeWall(18, 5, 0, 2.5, -8.8, 0);
+makeWall(18, 5, -8.8, 2.5, 0, Math.PI / 2);
+makeWall(18, 5, 8.8, 2.5, 0, -Math.PI / 2);
+
+const ceilingLight = new THREE.HemisphereLight(0xffffff, 0x4f463d, 2.1);
+scene.add(ceilingLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+keyLight.position.set(0, 7, 4);
+scene.add(keyLight);
+
+const accentLight = new THREE.PointLight(0xefbf04, 1.6, 18);
+accentLight.position.set(0, 3.8, 2);
+scene.add(accentLight);
+
+const loader = new THREE.TextureLoader();
+const clickableArtworks = [];
+const fallbackTexture = new THREE.CanvasTexture(createFallbackCanvas());
+fallbackTexture.colorSpace = THREE.SRGBColorSpace;
+
+function createFallbackCanvas() {
+    const fallback = document.createElement('canvas');
+    fallback.width = 512;
+    fallback.height = 640;
+    const context = fallback.getContext('2d');
+    context.fillStyle = '#f4f2f3';
+    context.fillRect(0, 0, fallback.width, fallback.height);
+    context.fillStyle = '#efbf04';
+    context.fillRect(40, 40, fallback.width - 80, fallback.height - 80);
+    context.fillStyle = '#111';
+    context.font = 'bold 42px serif';
+    context.textAlign = 'center';
+    context.fillText('ArtLink', fallback.width / 2, fallback.height / 2);
+    return fallback;
+}
+
+function artworkPositions(index, total) {
+    const backSlots = [-5.6, -2.8, 0, 2.8, 5.6];
+    const sideSlots = [-5.2, -2.2, 1.2, 4.2];
+    if (index < backSlots.length) {
+        return { position: new THREE.Vector3(backSlots[index], 2.35, -8.72), rotation: new THREE.Euler(0, 0, 0) };
+    }
+    const sideIndex = index - backSlots.length;
+    const leftSide = sideIndex % 2 === 0;
+    const slot = sideSlots[Math.floor(sideIndex / 2) % sideSlots.length];
+    return {
+        position: new THREE.Vector3(leftSide ? -8.72 : 8.72, 2.35, slot),
+        rotation: new THREE.Euler(0, leftSide ? Math.PI / 2 : -Math.PI / 2, 0),
+    };
+}
+
+function installArtwork(artwork, index) {
+    const texture = artwork.imageUrl ? loader.load(artwork.imageUrl) : fallbackTexture;
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    const group = new THREE.Group();
+    const placement = artworkPositions(index, artworks.length);
+    group.position.copy(placement.position);
+    group.rotation.copy(placement.rotation);
+
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(1.95, 2.45, 0.08), frameMaterial);
+    frame.position.z = -0.04;
+    group.add(frame);
+
+    const mat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.65 });
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1.72, 2.18), mat);
+    plane.position.z = 0.02;
+    plane.userData.artwork = artwork;
+    group.add(plane);
+    clickableArtworks.push(plane);
+
+    const labelCanvas = document.createElement('canvas');
+    labelCanvas.width = 512;
+    labelCanvas.height = 128;
+    const labelContext = labelCanvas.getContext('2d');
+    labelContext.fillStyle = '#ffffff';
+    labelContext.fillRect(0, 0, 512, 128);
+    labelContext.fillStyle = '#111111';
+    labelContext.font = 'bold 26px sans-serif';
+    labelContext.fillText(artwork.title.slice(0, 28), 24, 46);
+    labelContext.font = '20px sans-serif';
+    labelContext.fillStyle = '#555555';
+    labelContext.fillText(artwork.artist.slice(0, 32), 24, 84);
+    const labelTexture = new THREE.CanvasTexture(labelCanvas);
+    labelTexture.colorSpace = THREE.SRGBColorSpace;
+    const label = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.8, 0.45),
+        new THREE.MeshBasicMaterial({ map: labelTexture })
+    );
+    label.position.set(0, -1.48, 0.03);
+    group.add(label);
+
+    room.add(group);
+}
+
+artworks.slice(0, 13).forEach(installArtwork);
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const overlay = document.getElementById('artworkOverlay');
+
+function openOverlay(artwork) {
+    document.getElementById('overlayTitle').textContent = artwork.title;
+    document.getElementById('overlayArtist').textContent = artwork.artist;
+    document.getElementById('overlayArtist').href = artwork.artistProfileUrl;
+    document.getElementById('overlayPrice').textContent = `$${artwork.price}`;
+    document.getElementById('overlayAvailability').textContent = artwork.availability;
+    document.getElementById('overlayMedium').textContent = artwork.medium;
+    document.getElementById('overlayDimensions').textContent = artwork.dimensions;
+    const statement = artwork.artistStatement ? `\n\nArtist Statement\n${artwork.artistStatement}` : '';
+    document.getElementById('overlayDescription').textContent = `${artwork.description}${statement}`;
+    document.getElementById('overlayArtworkLink').href = artwork.detailUrl;
+    document.getElementById('overlayArtistLink').href = artwork.artistProfileUrl;
+    overlay.classList.add('is-open');
+}
+
+function inspectAt(clientX, clientY) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObjects(clickableArtworks, false)[0];
+    if (hit?.object?.userData?.artwork) {
+        openOverlay(hit.object.userData.artwork);
+    }
+}
+
+canvas.addEventListener('click', (event) => inspectAt(event.clientX, event.clientY));
+canvas.addEventListener('touchend', (event) => {
+    const touch = event.changedTouches[0];
+    if (touch) inspectAt(touch.clientX, touch.clientY);
+}, { passive: true });
+
+document.getElementById('closeOverlay').addEventListener('click', () => overlay.classList.remove('is-open'));
+document.getElementById('resetCamera').addEventListener('click', () => {
+    camera.position.set(0, 2.3, 8.5);
+    controls.target.set(0, 1.5, 0);
+    controls.update();
+});
+
+function resize() {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+}
+
+window.addEventListener('resize', resize);
+resize();
+
+function animate() {
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+{% endif %}
+{% endblock %}

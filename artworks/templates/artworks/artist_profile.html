@@ -271,11 +271,13 @@
                 </div>
                 {% endif %}
 
-                {% if request.user == artist %}
                 <div class="artist-actions">
+                    {% if request.user == artist %}
                     <a href="{% url 'edit_artist_profile' %}" class="btn">Edit Profile</a>
+                    {% else %}
+                    <a href="{% url 'request_custom_artwork' artist.pk %}" class="btn">Request Custom Artwork</a>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </section>
