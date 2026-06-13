@@ -5,16 +5,97 @@
 
 {% block content %}
 <style>
-    main {
-        min-height: 0;
+    main { min-height: 0; }
+
+    .gallery-page {
+        min-height: calc(100vh - 82px);
+        background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
     }
 
+    /* Entry screen */
+    .gallery-entry {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 2.5rem;
+        align-items: center;
+        min-height: calc(100vh - 82px);
+    }
+
+    .gallery-entry-copy h1 {
+        font-family: 'Elsie', serif;
+        font-size: clamp(2.4rem, 4vw, 4rem);
+        line-height: 1.02;
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    .gallery-entry-copy p {
+        color: rgba(255,255,255,0.78);
+        line-height: 1.85;
+        margin-bottom: 1.5rem;
+        max-width: 560px;
+    }
+
+    .gallery-entry-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .gallery-entry-meta span {
+        background: rgba(239, 191, 4, 0.14);
+        border: 1px solid rgba(239, 191, 4, 0.28);
+        color: #f8f6ef;
+        border-radius: 999px;
+        padding: 0.4rem 0.85rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .gallery-entry-actions {
+        display: flex;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+    }
+
+    .gallery-entry-cover {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.12);
+        aspect-ratio: 4 / 5;
+        background: #222;
+    }
+
+    .gallery-entry-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .gallery-entry-cover-placeholder {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: rgba(255,255,255,0.5);
+        font-family: 'Elsie', serif;
+        font-size: 2rem;
+    }
+
+    /* Runtime shell */
     .gallery-shell {
         position: relative;
         min-height: calc(100vh - 82px);
-        background: #111;
-        overflow: hidden;
+        display: none;
     }
+
+    .gallery-shell.is-active { display: block; }
 
     #galleryCanvas {
         width: 100%;
@@ -39,9 +120,9 @@
     .gallery-title-panel,
     .gallery-controls-panel,
     .artwork-overlay {
-        background: rgba(255, 255, 255, 0.92);
+        background: rgba(255, 255, 255, 0.94);
         border: 1px solid rgba(255, 255, 255, 0.35);
-        border-radius: 8px;
+        border-radius: 10px;
         box-shadow: 0 18px 45px rgba(0,0,0,0.22);
         backdrop-filter: blur(16px);
         pointer-events: auto;
@@ -52,19 +133,19 @@
         max-width: 460px;
     }
 
-    .gallery-title-panel h1 {
+    .gallery-title-panel h2 {
         font-family: 'Elsie', serif;
         color: #111;
         line-height: 1;
         margin: 0 0 0.35rem;
-        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-size: clamp(1.3rem, 2.5vw, 1.8rem);
     }
 
     .gallery-title-panel p {
         color: #555;
         margin: 0;
         line-height: 1.5;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
     }
 
     .gallery-controls-panel {
@@ -93,6 +174,93 @@
         background: rgba(239, 191, 4, 0.1);
     }
 
+    .gallery-joystick {
+        position: absolute;
+        left: 1rem;
+        bottom: 1rem;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.35);
+        z-index: 6;
+        touch-action: none;
+    }
+
+    .gallery-joystick-knob {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(239,191,4,0.85);
+        transform: translate(-50%, -50%);
+    }
+
+    /* Loading overlay */
+    .gallery-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: rgba(17, 17, 17, 0.92);
+        display: none;
+        place-items: center;
+        padding: 2rem;
+    }
+
+    .gallery-loading.is-visible { display: grid; }
+
+    .gallery-loading-card {
+        width: min(460px, 100%);
+        background: rgba(255,255,255,0.96);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    }
+
+    .gallery-loading-card h2 {
+        font-family: 'Elsie', serif;
+        color: #111;
+        margin-bottom: 0.75rem;
+        font-size: 1.8rem;
+    }
+
+    .gallery-loading-card p {
+        color: #555;
+        margin-bottom: 1.25rem;
+        min-height: 1.5rem;
+    }
+
+    .gallery-loading-bar {
+        height: 4px;
+        background: rgba(17,17,17,0.08);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+    }
+
+    .gallery-loading-bar span {
+        display: block;
+        height: 100%;
+        width: 35%;
+        background: var(--gold);
+        border-radius: 999px;
+        animation: galleryLoadPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes galleryLoadPulse {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(320%); }
+    }
+
+    .gallery-loading-note {
+        font-size: 0.88rem;
+        color: #777;
+    }
+
+    /* Artwork overlay */
     .artwork-overlay {
         position: absolute;
         right: 1rem;
@@ -103,9 +271,7 @@
         display: none;
     }
 
-    .artwork-overlay.is-open {
-        display: block;
-    }
+    .artwork-overlay.is-open { display: block; }
 
     .artwork-overlay h2 {
         font-family: 'Elsie', serif;
@@ -128,7 +294,6 @@
         line-height: 1.7;
         max-height: 170px;
         overflow: auto;
-        padding-right: 0.25rem;
     }
 
     .overlay-actions {
@@ -149,40 +314,61 @@
         color: #555;
     }
 
-    .gallery-empty {
-        color: #fff;
-        min-height: 70vh;
+    /* Empty / error states */
+    .gallery-empty,
+    .gallery-error {
+        min-height: calc(100vh - 82px);
         display: grid;
         place-items: center;
         text-align: center;
         padding: 2rem;
+        color: #fff;
     }
 
-    @media (max-width: 780px) {
-        #galleryCanvas {
-            height: calc(100vh - 74px);
+    .gallery-empty-card,
+    .gallery-error-card {
+        max-width: 520px;
+        background: rgba(255,255,255,0.96);
+        color: #111;
+        border-radius: 12px;
+        padding: 2.5rem 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    .gallery-empty-card h1,
+    .gallery-error-card h1 {
+        font-family: 'Elsie', serif;
+        margin-bottom: 0.75rem;
+    }
+
+    .gallery-empty-card p,
+    .gallery-error-card p {
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+    }
+
+    .is-hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+        .gallery-entry {
+            grid-template-columns: 1fr;
+            padding: 2rem 1.25rem;
+            min-height: auto;
         }
 
-        .gallery-shell {
-            min-height: calc(100vh - 74px);
-        }
+        .gallery-entry-cover { max-height: 420px; }
 
-        .gallery-topbar {
-            display: grid;
-        }
+        #galleryCanvas,
+        .gallery-shell { min-height: calc(100vh - 74px); height: calc(100vh - 74px); }
 
-        .gallery-title-panel {
-            max-width: none;
-        }
+        .gallery-topbar { display: grid; }
 
-        .gallery-controls-panel {
-            justify-content: start;
-        }
+        .gallery-title-panel { max-width: none; }
 
         .artwork-overlay {
             left: 1rem;
             right: 1rem;
-            bottom: 1rem;
             width: auto;
         }
     }
@@ -190,54 +376,115 @@
 
 {{ artwork_data|json_script:"gallery-artworks" }}
 
-<div class="gallery-shell">
+<div class="gallery-page">
     {% if artworks %}
-    <canvas id="galleryCanvas"></canvas>
-    <div class="gallery-topbar">
-        <div class="gallery-title-panel">
+    <section class="gallery-entry" id="galleryEntry">
+        <div class="gallery-entry-copy">
             <h1>{{ exhibition.title }}</h1>
-            <p>Click to enter, then use WASD + mouse on desktop or the touch joystick on mobile. Tap an artwork to inspect it.</p>
+            <div class="gallery-entry-meta">
+                <span>{{ artworks|length }} artwork{{ artworks|length|pluralize }}</span>
+                <span>{{ exhibition.start_date|date:"M d, Y" }} – {{ exhibition.end_date|date:"M d, Y" }}</span>
+            </div>
+            <p>{{ exhibition.description|truncatewords:48 }}</p>
+            <div class="gallery-entry-actions">
+                <button type="button" class="btn" id="enterGalleryBtn">Enter Gallery</button>
+                <a href="{% url 'exhibition_detail' exhibition.slug %}" class="btn btn-secondary" style="border-color:rgba(255,255,255,0.35);color:#fff;">View Exhibition</a>
+            </div>
         </div>
-        <div class="gallery-controls-panel">
-            <a href="{% url 'exhibition_detail' exhibition.slug %}">Exhibition</a>
-            <button type="button" id="resetCamera">Reset View</button>
+        <div class="gallery-entry-cover">
+            {% if exhibition.cover_image %}
+            <img src="{{ exhibition.cover_image.url }}" alt="{{ exhibition.title }}">
+            {% elif exhibition.featured_image %}
+            <img src="{{ exhibition.featured_image.url }}" alt="{{ exhibition.title }}">
+            {% elif cover_artwork and cover_artwork.images %}
+            <img src="{{ cover_artwork.images.url }}" alt="{{ cover_artwork.title }}">
+            {% else %}
+            <div class="gallery-entry-cover-placeholder">Virtual Exhibition</div>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="gallery-loading" id="galleryLoading" aria-live="polite">
+        <div class="gallery-loading-card">
+            <h2>Loading Gallery</h2>
+            <div class="gallery-loading-bar"><span></span></div>
+            <p id="galleryLoadingMessage">Loading Exhibition...</p>
+            <p class="gallery-loading-note">Installing artworks and preparing the room.</p>
         </div>
     </div>
 
-    <aside class="artwork-overlay" id="artworkOverlay" aria-live="polite">
-        <button class="close-overlay" type="button" id="closeOverlay" aria-label="Close artwork details">&times;</button>
-        <h2 id="overlayTitle"></h2>
-        <p><a id="overlayArtist" href="#"></a></p>
-        <div class="overlay-meta">
-            <div><strong>Price</strong><br><span id="overlayPrice"></span></div>
-            <div><strong>Status</strong><br><span id="overlayAvailability"></span></div>
-            <div><strong>Medium</strong><br><span id="overlayMedium"></span></div>
-            <div><strong>Dimensions</strong><br><span id="overlayDimensions"></span></div>
+    <div class="gallery-shell" id="galleryRuntime">
+        <canvas id="galleryCanvas"></canvas>
+        <div class="gallery-topbar">
+            <div class="gallery-title-panel">
+                <h2>{{ exhibition.title }}</h2>
+                <p>Drag to look around · WASD to move · Click an artwork to inspect</p>
+            </div>
+            <div class="gallery-controls-panel">
+                <a href="{% url 'exhibition_detail' exhibition.slug %}">Exhibition</a>
+                <button type="button" id="resetCamera">Reset View</button>
+            </div>
         </div>
-        <div class="overlay-description" id="overlayDescription"></div>
-        <div class="overlay-actions">
-            <a class="btn" id="overlayArtworkLink" href="#">View Artwork</a>
-            <a class="btn btn-secondary" id="overlayArtistLink" href="#">Artist Profile</a>
+        <aside class="artwork-overlay" id="artworkOverlay" aria-live="polite">
+            <button class="close-overlay" type="button" id="closeOverlay" aria-label="Close artwork details">&times;</button>
+            <h2 id="overlayTitle"></h2>
+            <p><a id="overlayArtist" href="#"></a></p>
+            <div class="overlay-meta">
+                <div><strong>Price</strong><br><span id="overlayPrice"></span></div>
+                <div><strong>Status</strong><br><span id="overlayAvailability"></span></div>
+                <div><strong>Medium</strong><br><span id="overlayMedium"></span></div>
+                <div><strong>Dimensions</strong><br><span id="overlayDimensions"></span></div>
+            </div>
+            <div class="overlay-description" id="overlayDescription"></div>
+            <div class="overlay-actions">
+                <a class="btn" id="overlayArtworkLink" href="#">View Artwork</a>
+                <a class="btn btn-secondary" id="overlayArtistLink" href="#">Artist Profile</a>
+            </div>
+        </aside>
+    </div>
+
+    <section class="gallery-error is-hidden" id="galleryError">
+        <div class="gallery-error-card">
+            <h1>Virtual Gallery failed to load.</h1>
+            <p id="galleryErrorMessage">The virtual gallery failed to initialize. Please refresh and try again.</p>
+            <button type="button" class="btn" id="retryGalleryBtn">Try Again</button>
+            <a href="{% url 'exhibition_detail' exhibition.slug %}" class="btn btn-secondary" style="margin-left:0.5rem;">Back to Exhibition</a>
         </div>
-    </aside>
+    </section>
     {% else %}
-    <div class="gallery-empty">
-        <div>
-            <h1>No artworks in this gallery yet.</h1>
-            <p>Return to the exhibition page while the collection is being installed.</p>
+    <section class="gallery-empty">
+        <div class="gallery-empty-card">
+            <h1>No artworks available in this exhibition.</h1>
+            <p>This virtual gallery cannot be opened until artworks are added to the exhibition.</p>
             <a href="{% url 'exhibition_detail' exhibition.slug %}" class="btn">Back to Exhibition</a>
         </div>
-    </div>
+    </section>
     {% endif %}
 </div>
 
 {% if artworks %}
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+    }
+}
+</script>
 <script type="module">
-import { VirtualGallery } from '{% static "js/virtual-gallery.js" %}';
-
+const galleryModuleUrl = '{% static "js/virtual-gallery.js" %}';
 const artworks = JSON.parse(document.getElementById('gallery-artworks').textContent);
-const canvas = document.getElementById('galleryCanvas');
+const entry = document.getElementById('galleryEntry');
+const loading = document.getElementById('galleryLoading');
+const runtime = document.getElementById('galleryRuntime');
+const errorPanel = document.getElementById('galleryError');
+const loadingMessage = document.getElementById('galleryLoadingMessage');
 const overlay = document.getElementById('artworkOverlay');
+const canvas = document.getElementById('galleryCanvas');
+let galleryInstance = null;
+let VirtualGalleryClass = null;
+
+console.debug('[VirtualGallery] Artwork count:', artworks.length);
 
 function openOverlay(artwork) {
     document.getElementById('overlayTitle').textContent = artwork.title;
@@ -254,14 +501,79 @@ function openOverlay(artwork) {
     overlay.classList.add('is-open');
 }
 
-const gallery = new VirtualGallery({
-    canvas,
-    artworks,
-    onArtworkSelect: openOverlay,
-});
+function showError(error) {
+    const detail = error?.message || String(error || 'Unknown error');
+    console.error('[VirtualGallery] Virtual Gallery failed to load.', error);
+    loading.classList.remove('is-visible');
+    runtime.classList.remove('is-active');
+    errorPanel.classList.remove('is-hidden');
+    document.getElementById('galleryErrorMessage').textContent = detail;
+}
 
-document.getElementById('closeOverlay').addEventListener('click', () => overlay.classList.remove('is-open'));
-document.getElementById('resetCamera').addEventListener('click', () => gallery.resetCamera());
+async function loadGalleryModule() {
+    if (!VirtualGalleryClass) {
+        loadingMessage.textContent = 'Loading Exhibition...';
+        await import('three');
+        console.debug('[VirtualGallery] Three.js loaded successfully');
+        const module = await import(galleryModuleUrl);
+        VirtualGalleryClass = module.VirtualGallery;
+    }
+    return VirtualGalleryClass;
+}
+
+async function startGallery() {
+    if (!artworks.length) {
+        showError(new Error('No artworks available in this exhibition.'));
+        return;
+    }
+
+    entry.classList.add('is-hidden');
+    errorPanel.classList.add('is-hidden');
+    loading.classList.add('is-visible');
+    loadingMessage.textContent = 'Loading Exhibition...';
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    try {
+        const VirtualGallery = await loadGalleryModule();
+        runtime.classList.add('is-active');
+        galleryInstance = new VirtualGallery({
+            canvas,
+            artworks,
+            onArtworkSelect: openOverlay,
+            onProgress: ({ message, loaded, total, failedTextures }) => {
+                loadingMessage.textContent = message;
+                if (failedTextures > 0 && loaded === total) {
+                    loadingMessage.textContent = `${message} (${failedTextures} artwork image${failedTextures === 1 ? '' : 's'} used fallback)`;
+                }
+            },
+            onReady: () => {
+                loading.classList.remove('is-visible');
+                galleryInstance.resize();
+                console.debug('[VirtualGallery] Gallery ready');
+            },
+            onError: (error) => {
+                showError(error);
+            },
+        });
+
+        document.getElementById('closeOverlay').addEventListener('click', () => overlay.classList.remove('is-open'));
+        document.getElementById('resetCamera').addEventListener('click', () => galleryInstance.resetCamera());
+    } catch (error) {
+        showError(error);
+    }
+}
+
+document.getElementById('enterGalleryBtn').addEventListener('click', startGallery);
+document.getElementById('retryGalleryBtn').addEventListener('click', () => {
+    if (galleryInstance) {
+        galleryInstance.destroy();
+        galleryInstance = null;
+    }
+    VirtualGalleryClass = null;
+    errorPanel.classList.add('is-hidden');
+    entry.classList.remove('is-hidden');
+});
 </script>
 {% endif %}
 {% endblock %}

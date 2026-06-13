@@ -71,13 +71,4 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.RunPython(assign_exhibition_artists, migrations.RunPython.noop),
-        migrations.AlterField(
-            model_name='exhibition',
-            name='artist',
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name='exhibitions',
-                to=settings.AUTH_USER_MODEL,
-            ),
-        ),
     ]

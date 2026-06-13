@@ -46,7 +46,14 @@ class Exhibition(models.Model):
         ('published', 'Published'),
     ]
 
-    artist = models.ForeignKey(User, on_delete=models.CASCADE, related_name='exhibitions')
+    artist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='exhibitions',
+        null=True,
+        blank=True,
+        default=None,
+    )
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     cover_image = models.ImageField(upload_to='exhibitions/', blank=True, null=True)

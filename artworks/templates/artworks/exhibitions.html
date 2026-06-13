@@ -79,11 +79,21 @@
     }
 
     .exhibition-card {
-        background: #fff;
+        background: rgba(255, 255, 255, 0.96);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 12px;
         box-shadow: var(--shadow-soft);
-        padding: 1rem;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .exhibition-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+
+    .exhibition-card-body {
+        padding: 1.25rem 1.35rem 1.4rem;
     }
 
     .exhibition-card h3 {
@@ -152,9 +162,11 @@
                 {% if exhibition.cover_image %}
                 <img src="{{ exhibition.cover_image.url }}" alt="{{ exhibition.title }}">
                 {% endif %}
+                <div class="exhibition-card-body">
                 <h3><a href="{% url 'exhibition_detail' exhibition.slug %}">{{ exhibition.title }}</a></h3>
-                <div class="exhibition-meta">Curated by {{ exhibition.curator_name }} · {{ exhibition.start_date|date:"M d" }} - {{ exhibition.end_date|date:"M d, Y" }}</div>
+                <div class="exhibition-meta">Curated by {{ exhibition.curator_name|default:exhibition.artist.username }} · {{ exhibition.start_date|date:"M d" }} - {{ exhibition.end_date|date:"M d, Y" }}</div>
                 <p>{{ exhibition.description|truncatewords:24 }}</p>
+                </div>
             </article>
             {% empty %}
             <div class="empty-exhibition">No current exhibitions are open yet.</div>
@@ -173,9 +185,11 @@
                 {% if exhibition.cover_image %}
                 <img src="{{ exhibition.cover_image.url }}" alt="{{ exhibition.title }}">
                 {% endif %}
+                <div class="exhibition-card-body">
                 <h3><a href="{% url 'exhibition_detail' exhibition.slug %}">{{ exhibition.title }}</a></h3>
-                <div class="exhibition-meta">Curated by {{ exhibition.curator_name }} · Ended {{ exhibition.end_date|date:"M d, Y" }}</div>
+                <div class="exhibition-meta">Curated by {{ exhibition.curator_name|default:exhibition.artist.username }} · Ended {{ exhibition.end_date|date:"M d, Y" }}</div>
                 <p>{{ exhibition.description|truncatewords:24 }}</p>
+                </div>
             </article>
             {% empty %}
             <div class="empty-exhibition">Past exhibitions will appear here.</div>

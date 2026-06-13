@@ -1,40 +1,80 @@
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+console.debug('[VirtualGallery] Three.js loaded successfully', { revision: THREE.REVISION });
 
 /**
- * Scalable virtual gallery runtime.
- * Designed to support future rooms, floors, audio guides, and curated tours.
+ * Virtual gallery runtime — plain ES modules + CDN (no bundler).
  */
 export class VirtualGallery {
-    constructor({ canvas, artworks, onArtworkSelect, onReady }) {
+    constructor({
+        canvas,
+        artworks,
+        onArtworkSelect,
+        onProgress,
+        onReady,
+        onError,
+    }) {
         this.canvas = canvas;
         this.artworks = artworks.slice(0, 13);
         this.onArtworkSelect = onArtworkSelect;
+        this.onProgress = onProgress;
         this.onReady = onReady;
+        this.onError = onError;
+
+        console.debug('[VirtualGallery] Gallery initialized');
+        console.debug('[VirtualGallery] Artwork count:', this.artworks.length);
+
+        if (!this.artworks.length) {
+            const error = new Error('No artworks available in this exhibition.');
+            if (this.onError) {
+                this.onError(error);
+            }
+            throw error;
+        }
 
         this.movement = { forward: false, backward: false, left: false, right: false };
         this.velocity = new THREE.Vector3();
         this.direction = new THREE.Vector3();
         this.clock = new THREE.Clock();
-        this.needsRender = true;
         this.isMobile = window.matchMedia('(max-width: 780px)').matches;
         this.highlightedMesh = null;
         this.clickableArtworks = [];
         this.textureQueue = [...this.artworks];
-        this.loadedTextures = new Map();
+        this.loadedCount = 0;
+        this.isActive = true;
+        this.failedTextures = 0;
 
-        this._initScene();
-        this._initRoom();
-        this._initLights();
-        this._initControls();
-        this._initInput();
-        this._initMobileJoystick();
-        this._scheduleTextureLoads();
-        this._bindEvents();
-        this._animate();
+        try {
+            this._report('Loading Exhibition...');
+            this._initScene();
+            this._initRoom();
+            this._initLights();
+            this._initControls();
+            this._initInput();
+            this._initMobileJoystick();
+            this._bindEvents();
+            this._report('Loading Artworks...');
+            this._scheduleTextureLoads();
+            this._animate();
+            this._markDirty();
+        } catch (error) {
+            console.error('[VirtualGallery] Initialization failed', error);
+            if (this.onError) {
+                this.onError(error);
+            }
+            throw error;
+        }
+    }
 
-        if (this.onReady) {
-            this.onReady();
+    _report(message) {
+        if (this.onProgress) {
+            this.onProgress({
+                message,
+                loaded: this.loadedCount,
+                total: this.artworks.length,
+                failedTextures: this.failedTextures,
+            });
         }
     }
 
@@ -44,11 +84,13 @@ export class VirtualGallery {
 
     _initScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x111111);
-        this.scene.fog = new THREE.Fog(0x111111, 14, 38);
+        this.scene.background = new THREE.Color(0x1a1a1a);
+        this.scene.fog = new THREE.Fog(0x1a1a1a, 14, 38);
+        console.debug('[VirtualGallery] Scene created');
 
         this.camera = new THREE.PerspectiveCamera(58, 1, 0.1, 100);
         this.camera.position.set(0, 1.65, 7.5);
+        console.debug('[VirtualGallery] Camera created');
 
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
@@ -57,6 +99,7 @@ export class VirtualGallery {
         });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.4 : 1.8));
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+        console.debug('[VirtualGallery] Renderer created');
 
         this.room = new THREE.Group();
         this.scene.add(this.room);
@@ -69,7 +112,6 @@ export class VirtualGallery {
 
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), floorMaterial);
         floor.rotation.x = -Math.PI / 2;
-        floor.receiveShadow = true;
         this.room.add(floor);
 
         const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), wallMaterial);
@@ -91,30 +133,31 @@ export class VirtualGallery {
     }
 
     _initLights() {
-        this.scene.add(new THREE.HemisphereLight(0xffffff, 0x4f463d, 2.1));
-        const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+        this.scene.add(new THREE.HemisphereLight(0xffffff, 0x4f463d, 1.4));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
         keyLight.position.set(0, 7, 4);
         this.scene.add(keyLight);
-        const accentLight = new THREE.PointLight(0xefbf04, 1.6, 18);
+        const accentLight = new THREE.PointLight(0xefbf04, 1.4, 18);
         accentLight.position.set(0, 3.8, 2);
         this.scene.add(accentLight);
     }
 
     _initControls() {
-        this.controls = new PointerLockControls(this.camera, this.canvas);
-        this.scene.add(this.controls.getObject());
-        this.controls.getObject().position.copy(this.camera.position);
+        this.controls = new OrbitControls(this.camera, this.canvas);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.06;
+        this.controls.target.set(0, 1.5, 0);
+        this.controls.maxPolarAngle = Math.PI * 0.48;
+        this.controls.minDistance = 2.5;
+        this.controls.maxDistance = 14;
+        this.controls.enablePan = true;
+        this.controls.addEventListener('change', () => this._markDirty());
     }
 
     _initInput() {
         this._onKeyDown = (event) => this._setMovementKey(event.code, true);
         this._onKeyUp = (event) => this._setMovementKey(event.code, false);
-        this._onClick = () => {
-            if (!this.controls.isLocked && !this.isMobile) {
-                this.canvas.requestPointerLock();
-            }
-        };
-        this._onPointerLockChange = () => this._markDirty();
         this._onInspect = (event) => {
             const clientX = event.clientX ?? event.changedTouches?.[0]?.clientX;
             const clientY = event.clientY ?? event.changedTouches?.[0]?.clientY;
@@ -127,8 +170,6 @@ export class VirtualGallery {
 
         document.addEventListener('keydown', this._onKeyDown);
         document.addEventListener('keyup', this._onKeyUp);
-        this.canvas.addEventListener('click', this._onClick);
-        document.addEventListener('pointerlockchange', this._onPointerLockChange);
         this.canvas.addEventListener('click', this._onInspect);
         this.canvas.addEventListener('touchend', this._onInspect, { passive: true });
     }
@@ -155,9 +196,9 @@ export class VirtualGallery {
         if (!this.isMobile) return;
 
         this.joystick = document.createElement('div');
-        this.joystick.style.cssText = 'position:absolute;left:1rem;bottom:1rem;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);z-index:6;touch-action:none;';
+        this.joystick.className = 'gallery-joystick';
         this.joystickKnob = document.createElement('div');
-        this.joystickKnob.style.cssText = 'position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:rgba(239,191,4,0.85);';
+        this.joystickKnob.className = 'gallery-joystick-knob';
         this.joystick.appendChild(this.joystickKnob);
         this.canvas.parentElement.appendChild(this.joystick);
 
@@ -171,7 +212,7 @@ export class VirtualGallery {
             const angle = Math.atan2(dy, dx);
             const offsetX = Math.cos(angle) * distance;
             const offsetY = Math.sin(angle) * distance;
-            this.joystickKnob.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+            this.joystickKnob.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
             this.movement.forward = dy < -8;
             this.movement.backward = dy > 8;
             this.movement.left = dx < -8;
@@ -181,7 +222,7 @@ export class VirtualGallery {
 
         const resetJoystick = () => {
             this.movement = { forward: false, backward: false, left: false, right: false };
-            this.joystickKnob.style.transform = 'translate(0, 0)';
+            this.joystickKnob.style.transform = 'translate(-50%, -50%)';
             this._markDirty();
         };
 
@@ -194,7 +235,7 @@ export class VirtualGallery {
         this.joystick.addEventListener('touchend', resetJoystick, { passive: true });
     }
 
-    _createFallbackTexture() {
+    _createFallbackTexture(label = 'ArtLink') {
         const fallback = document.createElement('canvas');
         fallback.width = 512;
         fallback.height = 640;
@@ -206,7 +247,7 @@ export class VirtualGallery {
         context.fillStyle = '#111';
         context.font = 'bold 42px serif';
         context.textAlign = 'center';
-        context.fillText('ArtLink', fallback.width / 2, fallback.height / 2);
+        context.fillText(label, fallback.width / 2, fallback.height / 2);
         const texture = new THREE.CanvasTexture(fallback);
         texture.colorSpace = THREE.SRGBColorSpace;
         return texture;
@@ -250,9 +291,29 @@ export class VirtualGallery {
 
     _scheduleTextureLoads() {
         const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('anonymous');
         const fallback = this._createFallbackTexture();
         let activeLoads = 0;
         const maxConcurrent = this.isMobile ? 2 : 3;
+
+        const maybeFinish = () => {
+            if (this.loadedCount >= this.artworks.length) {
+                console.debug('[VirtualGallery] Artworks loaded', {
+                    loaded: this.loadedCount,
+                    failedTextures: this.failedTextures,
+                });
+                this._report('Preparing Virtual Gallery...');
+                window.setTimeout(() => {
+                    if (this.onReady) {
+                        this.onReady({
+                            loaded: this.loadedCount,
+                            total: this.artworks.length,
+                            failedTextures: this.failedTextures,
+                        });
+                    }
+                }, 350);
+            }
+        };
 
         const loadNext = () => {
             while (activeLoads < maxConcurrent && this.textureQueue.length) {
@@ -260,24 +321,29 @@ export class VirtualGallery {
                 const index = this.artworks.indexOf(artwork);
                 activeLoads += 1;
 
-                const finish = (texture) => {
+                const finish = (texture, failed = false) => {
                     texture.colorSpace = THREE.SRGBColorSpace;
-                    this.loadedTextures.set(artwork.id, texture);
                     this._installArtwork(artwork, index, texture);
+                    this.loadedCount += 1;
+                    if (failed) {
+                        this.failedTextures += 1;
+                    }
+                    this._report(`Loading Artworks... (${this.loadedCount}/${this.artworks.length})`);
                     activeLoads -= 1;
                     loadNext();
+                    maybeFinish();
                 };
 
                 if (!artwork.imageUrl) {
-                    finish(fallback);
+                    finish(fallback, true);
                     continue;
                 }
 
                 loader.load(
                     artwork.imageUrl,
-                    (texture) => finish(texture),
+                    (texture) => finish(texture, false),
                     undefined,
-                    () => finish(fallback),
+                    () => finish(fallback, true),
                 );
             }
         };
@@ -305,19 +371,34 @@ export class VirtualGallery {
         if (this.movement.backward) this.direction.z += 1;
         if (this.movement.left) this.direction.x -= 1;
         if (this.movement.right) this.direction.x += 1;
+        if (this.direction.lengthSq() === 0) {
+            return;
+        }
         this.direction.normalize();
 
         const speed = this.isMobile ? 16 : 22;
-        if (this.movement.forward || this.movement.backward) this.velocity.z -= this.direction.z * speed * delta;
-        if (this.movement.left || this.movement.right) this.velocity.x -= this.direction.x * speed * delta;
+        const forward = new THREE.Vector3();
+        this.camera.getWorldDirection(forward);
+        forward.y = 0;
+        forward.normalize();
+        const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
 
-        this.controls.moveRight(-this.velocity.x * delta);
-        this.controls.moveForward(-this.velocity.z * delta);
+        if (this.movement.forward || this.movement.backward) {
+            const sign = this.movement.forward ? 1 : -1;
+            this.camera.position.addScaledVector(forward, sign * speed * delta);
+            this.controls.target.addScaledVector(forward, sign * speed * delta);
+        }
+        if (this.movement.left || this.movement.right) {
+            const sign = this.movement.right ? 1 : -1;
+            this.camera.position.addScaledVector(right, sign * speed * delta);
+            this.controls.target.addScaledVector(right, sign * speed * delta);
+        }
 
-        const position = this.controls.getObject().position;
-        position.y = 1.65;
-        position.x = THREE.MathUtils.clamp(position.x, -7.5, 7.5);
-        position.z = THREE.MathUtils.clamp(position.z, -7.5, 7.5);
+        this.camera.position.y = 1.65;
+        this.controls.target.y = 1.5;
+        this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, -7.5, 7.5);
+        this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, -7.5, 7.5);
+        this._markDirty();
     }
 
     _updateHighlights() {
@@ -335,6 +416,7 @@ export class VirtualGallery {
 
         if (this.highlightedMesh && this.highlightedMesh !== nearest) {
             this.highlightedMesh.material.emissive.copy(this.highlightedMesh.userData.baseEmissive);
+            this.highlightedMesh.material.emissiveIntensity = 0;
             this.highlightedMesh.scale.set(1, 1, 1);
         }
 
@@ -348,14 +430,18 @@ export class VirtualGallery {
     }
 
     resetCamera() {
-        this.controls.getObject().position.set(0, 1.65, 7.5);
-        this.camera.rotation.set(0, 0, 0);
+        this.camera.position.set(0, 1.65, 7.5);
+        this.controls.target.set(0, 1.5, 0);
+        this.controls.update();
         this._markDirty();
     }
 
     resize() {
         const width = this.canvas.clientWidth;
         const height = this.canvas.clientHeight;
+        if (!width || !height) {
+            return;
+        }
         this.renderer.setSize(width, height, false);
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
@@ -369,27 +455,26 @@ export class VirtualGallery {
     }
 
     _animate() {
+        if (!this.isActive) {
+            return;
+        }
         requestAnimationFrame(() => this._animate());
         const delta = Math.min(this.clock.getDelta(), 0.05);
         const moving = Object.values(this.movement).some(Boolean);
         if (moving) {
             this._updateMovement(delta);
-            this._markDirty();
         }
-        if (this.controls.isLocked || moving || this.isMobile) {
-            this._updateHighlights();
-        }
-        if (this.needsRender) {
-            this.renderer.render(this.scene, this.camera);
-            this.needsRender = false;
-        }
+        this.controls.update();
+        this._updateHighlights();
+        this.renderer.render(this.scene, this.camera);
     }
 
     destroy() {
+        this.isActive = false;
         document.removeEventListener('keydown', this._onKeyDown);
         document.removeEventListener('keyup', this._onKeyUp);
-        document.removeEventListener('pointerlockchange', this._onPointerLockChange);
         window.removeEventListener('resize', this._onResize);
+        this.controls.dispose();
         this.renderer.dispose();
     }
 }

@@ -47,6 +47,10 @@ def artists_list(request):
     artists = Profile.objects.filter(user_type='artist')
     return render(request, 'artworks/artists.html', {'artists': artists})
 
+
+def about(request):
+    return render(request, 'artworks/about.html')
+
 def verify_certificate(request):
     certificate = None
     certificate_status = None
@@ -88,10 +92,11 @@ def exhibition_detail(request, slug):
         slug=slug,
     )
     artworks = exhibition.artworks.select_related('artist', 'artist__profile').all()
+    artist_profile = exhibition.artist.profile if exhibition.artist_id else None
     return render(request, 'artworks/exhibition_detail.html', {
         'exhibition': exhibition,
         'artworks': artworks,
-        'artist_profile': exhibition.artist.profile,
+        'artist_profile': artist_profile,
     })
 
 
@@ -101,6 +106,7 @@ def exhibition_gallery(request, slug):
         slug=slug,
     )
     artworks = exhibition.artworks.select_related('artist', 'artist__profile').all()
+    cover_artwork = artworks.first()
     artwork_data = []
     for artwork in artworks:
         image_url = ''
@@ -124,5 +130,6 @@ def exhibition_gallery(request, slug):
     return render(request, 'artworks/exhibition_gallery.html', {
         'exhibition': exhibition,
         'artworks': artworks,
+        'cover_artwork': cover_artwork,
         'artwork_data': artwork_data,
     })

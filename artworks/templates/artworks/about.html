@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Max Atelier{% endblock %}
+
+{% block content %}
+<style>
+    .about-page {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 4rem 2rem 5rem;
+    }
+
+    .about-hero {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow-soft);
+        padding: 3rem;
+        margin-bottom: 2rem;
+    }
+
+    .about-hero h1 {
+        font-family: 'Elsie', serif;
+        font-size: clamp(2.6rem, 4vw, 4rem);
+        line-height: 1.02;
+        color: #111;
+        margin-bottom: 1rem;
+    }
+
+    .about-hero p {
+        color: var(--muted);
+        line-height: 1.85;
+        margin-bottom: 1rem;
+    }
+
+    .about-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .about-card {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .about-card h2 {
+        font-family: 'Elsie', serif;
+        font-size: 1.35rem;
+        color: #111;
+        margin-bottom: 0.65rem;
+    }
+
+    .about-card p {
+        color: var(--muted);
+        line-height: 1.75;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .about-page { padding: 2rem 1rem 3rem; }
+        .about-hero { padding: 2rem 1.5rem; }
+    }
+</style>
+
+<div class="about-page">
+    <section class="about-hero">
+        <h1>About Max Atelier</h1>
+        <p>Max Atelier is a curated online art marketplace connecting collectors with authentic artwork from emerging and established artists around the world.</p>
+        <p>Every listing is presented with gallery-level care — verified authenticity, artist profiles, curated exhibitions, and immersive virtual gallery experiences designed to feel intentional, elegant, and trustworthy.</p>
+    </section>
+
+    <div class="about-grid">
+        <article class="about-card">
+            <h2>Our Mission</h2>
+            <p>To make discovering, collecting, and commissioning art feel as refined online as it does in a physical gallery.</p>
+        </article>
+        <article class="about-card">
+            <h2>For Collectors</h2>
+            <p>Browse the marketplace, explore exhibitions, verify certificates, and connect directly with artists.</p>
+        </article>
+        <article class="about-card">
+            <h2>For Artists</h2>
+            <p>Present your portfolio, manage inquiries, accept custom commissions, and curate your own exhibitions.</p>
+        </article>
+    </div>
+</div>
+{% endblock %}
