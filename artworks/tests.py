@@ -32,14 +32,28 @@ class ExhibitionViewsTests(TestCase):
         )
         today = timezone.localdate()
         self.exhibition = Exhibition.objects.create(
+            artist=self.artist,
             title='Digital Salon',
-            description='A curated exhibition statement.',
-            curator_name='ArtLink Curator',
+            description='A curated exhibition overview.',
+            curator_statement='A curated exhibition statement.',
             start_date=today - timedelta(days=1),
             end_date=today + timedelta(days=10),
             featured=True,
+            visibility='published',
         )
         self.exhibition.artworks.add(self.artwork)
+
+    def test_draft_exhibition_is_hidden_from_public_pages(self):
+        draft = Exhibition.objects.create(
+            artist=self.artist,
+            title='Hidden Draft',
+            description='Draft only.',
+            start_date=timezone.localdate(),
+            end_date=timezone.localdate() + timedelta(days=5),
+            visibility='draft',
+        )
+        response = self.client.get(reverse('exhibition_detail', kwargs={'slug': draft.slug}))
+        self.assertEqual(response.status_code, 404)
 
     def test_exhibitions_home_lists_current_exhibition(self):
         response = self.client.get(reverse('exhibitions'))
@@ -54,7 +68,8 @@ class ExhibitionViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Gallery Work')
         self.assertContains(response, 'Enter Virtual Gallery')
-        self.assertContains(response, 'I work with light')
+        self.assertContains(response, 'Curator Statement')
+        self.assertContains(response, 'A curated exhibition statement.')
 
     def test_exhibition_gallery_serializes_artwork_data(self):
         response = self.client.get(reverse('exhibition_gallery', kwargs={'slug': self.exhibition.slug}))

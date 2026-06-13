@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import Profile
-from artworks.models import Artwork
+from artworks.models import Artwork, Exhibition
 from .models import Inquiry, CustomArtworkRequest
 
 
@@ -169,3 +169,56 @@ class CustomArtworkRequestTests(TestCase):
         self.assertRedirects(response, reverse('custom_request_inbox'))
         custom_request.refresh_from_db()
         self.assertEqual(custom_request.status, 'contacted')
+
+
+class ExhibitionDashboardTests(TestCase):
+    def setUp(self):
+        self.artist = User.objects.create_user(
+            username='showartist',
+            email='showartist@example.com',
+            password='Strongpass123!',
+        )
+        Profile.objects.create(user=self.artist, user_type='artist')
+        self.artwork = Artwork.objects.create(
+            artist=self.artist,
+            title='Show Piece',
+            description='For exhibition management tests.',
+            price='900.00',
+            medium='oil',
+            size='30x40',
+            year_created=2026,
+        )
+
+    def test_artist_can_create_exhibition(self):
+        self.client.login(username='showartist', password='Strongpass123!')
+        response = self.client.post(reverse('create_exhibition'), {
+            'title': 'Spring Salon',
+            'slug': 'spring-salon',
+            'description': 'A spring overview.',
+            'curator_statement': 'Curatorial narrative.',
+            'start_date': '2026-06-01',
+            'end_date': '2026-07-01',
+            'visibility': 'draft',
+            'artworks': [self.artwork.pk],
+        })
+        self.assertRedirects(response, reverse('dashboard_exhibitions'))
+        exhibition = Exhibition.objects.get(slug='spring-salon')
+        self.assertEqual(exhibition.artist, self.artist)
+        self.assertEqual(exhibition.artworks.count(), 1)
+
+    def test_artist_can_publish_exhibition(self):
+        exhibition = Exhibition.objects.create(
+            artist=self.artist,
+            title='Publish Me',
+            description='Overview',
+            start_date='2026-06-01',
+            end_date='2026-07-01',
+            visibility='draft',
+        )
+        self.client.login(username='showartist', password='Strongpass123!')
+        response = self.client.post(reverse('toggle_exhibition_visibility', kwargs={'exhibition_id': exhibition.pk}), {
+            'visibility': 'published',
+        })
+        self.assertRedirects(response, reverse('dashboard_exhibitions'))
+        exhibition.refresh_from_db()
+        self.assertEqual(exhibition.visibility, 'published')

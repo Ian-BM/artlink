@@ -1,0 +1,78 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Exhibitions - ArtLink{% endblock %}
+
+{% block studio_content %}
+<div class="studio-header">
+    <h1>Exhibitions</h1>
+    <p>Create curated shows, publish them publicly, and connect each exhibition to your virtual gallery.</p>
+</div>
+
+<div class="studio-panel">
+    <div class="studio-panel-header">
+        <h2>Your Exhibitions</h2>
+        <a href="{% url 'create_exhibition' %}" class="btn">+ Create Exhibition</a>
+    </div>
+    {% if exhibitions %}
+    <div class="studio-table-wrap">
+        <table class="studio-table">
+            <thead>
+                <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Dates</th>
+                    <th>Works</th>
+                    <th>Visibility</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exhibition in exhibitions %}
+                <tr>
+                    <td>
+                        {% if exhibition.cover_image %}
+                        <img src="{{ exhibition.cover_image.url }}" alt="{{ exhibition.title }}">
+                        {% else %}
+                        <span>—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ exhibition.title }}</strong><br>
+                        <small style="color: var(--muted);">/{{ exhibition.slug }}</small>
+                    </td>
+                    <td>{{ exhibition.start_date|date:"M d, Y" }} – {{ exhibition.end_date|date:"M d, Y" }}</td>
+                    <td>{{ exhibition.artworks.count }}</td>
+                    <td><span class="status-pill status-{{ exhibition.visibility }}">{{ exhibition.get_visibility_display }}</span></td>
+                    <td>
+                        <div class="inline-actions">
+                            <a href="{% url 'edit_exhibition' exhibition.pk %}" class="inline-btn inline-btn-edit">Edit</a>
+                            {% if exhibition.visibility == 'published' %}
+                            <a href="{% url 'exhibition_detail' exhibition.slug %}" class="inline-btn inline-btn-gold" target="_blank" rel="noopener">View Public</a>
+                            <a href="{% url 'exhibition_gallery' exhibition.slug %}" class="inline-btn inline-btn-neutral" target="_blank" rel="noopener">Virtual Gallery</a>
+                            {% endif %}
+                            <form method="post" action="{% url 'toggle_exhibition_visibility' exhibition.pk %}">
+                                {% csrf_token %}
+                                {% if exhibition.visibility == 'draft' %}
+                                <input type="hidden" name="visibility" value="published">
+                                <button type="submit" class="inline-btn inline-btn-gold">Publish</button>
+                                {% else %}
+                                <input type="hidden" name="visibility" value="draft">
+                                <button type="submit" class="inline-btn inline-btn-neutral">Unpublish</button>
+                                {% endif %}
+                            </form>
+                            <form method="post" action="{% url 'delete_exhibition' exhibition.pk %}" onsubmit="return confirm('Delete this exhibition permanently?');">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-btn inline-btn-delete">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-studio">No exhibitions yet. <a href="{% url 'create_exhibition' %}">Create your first exhibition</a>.</div>
+    {% endif %}
+</div>
+{% endblock %}

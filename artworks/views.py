@@ -6,12 +6,18 @@ from .models import Artwork, Certificate, Exhibition
 from accounts.models import Profile
 from django.contrib.auth.models import User
 
+def published_exhibitions():
+    return Exhibition.objects.filter(visibility='published')
+
+
 def home(request):
     featured_artworks = Artwork.objects.select_related('artist').order_by('-created_at')[:6]
     featured_artists = Profile.objects.filter(user_type='artist')[:4]
+    featured_exhibition = published_exhibitions().filter(featured=True).first()
     return render(request, 'artworks/home.html', {
         'featured_artworks': featured_artworks,
         'featured_artists': featured_artists,
+        'featured_exhibition': featured_exhibition,
     })
 
 def marketplace(request):
@@ -65,7 +71,7 @@ def verify_certificate(request):
 
 def exhibitions_home(request):
     today = timezone.localdate()
-    exhibitions = Exhibition.objects.prefetch_related('artworks')
+    exhibitions = published_exhibitions().select_related('artist', 'artist__profile').prefetch_related('artworks')
     featured_exhibition = exhibitions.filter(featured=True).first()
     current_exhibitions = exhibitions.filter(start_date__lte=today, end_date__gte=today)
     past_exhibitions = exhibitions.filter(end_date__lt=today)
@@ -78,19 +84,20 @@ def exhibitions_home(request):
 
 def exhibition_detail(request, slug):
     exhibition = get_object_or_404(
-        Exhibition.objects.prefetch_related('artworks__artist__profile'),
+        published_exhibitions().select_related('artist', 'artist__profile').prefetch_related('artworks__artist__profile'),
         slug=slug,
     )
     artworks = exhibition.artworks.select_related('artist', 'artist__profile').all()
     return render(request, 'artworks/exhibition_detail.html', {
         'exhibition': exhibition,
         'artworks': artworks,
+        'artist_profile': exhibition.artist.profile,
     })
 
 
 def exhibition_gallery(request, slug):
     exhibition = get_object_or_404(
-        Exhibition.objects.prefetch_related('artworks__artist__profile'),
+        published_exhibitions().prefetch_related('artworks__artist__profile'),
         slug=slug,
     )
     artworks = exhibition.artworks.select_related('artist', 'artist__profile').all()

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.validators import FileExtensionValidator
-from artworks.models import Artwork, Certificate
+from artworks.models import Artwork, Certificate, Exhibition
 from dashboard.models import Inquiry, CustomArtworkRequest
 
 class ArtworkForm(forms.ModelForm):
@@ -72,3 +72,48 @@ class CustomArtworkRequestStatusForm(forms.ModelForm):
     class Meta:
         model = CustomArtworkRequest
         fields = ['status']
+
+
+class ExhibitionForm(forms.ModelForm):
+    artworks = forms.ModelMultipleChoiceField(
+        queryset=Artwork.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label='Select Artworks',
+    )
+
+    class Meta:
+        model = Exhibition
+        fields = [
+            'title',
+            'slug',
+            'cover_image',
+            'description',
+            'curator_statement',
+            'start_date',
+            'end_date',
+            'featured_image',
+            'visibility',
+            'artworks',
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Exhibition title'}),
+            'slug': forms.TextInput(attrs={'placeholder': 'exhibition-slug'}),
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Exhibition overview for visitors...'}),
+            'curator_statement': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Your curatorial vision and narrative...'}),
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, artist=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if artist is not None:
+            self.fields['artworks'].queryset = Artwork.objects.filter(artist=artist).order_by('-created_at')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError('End date must be on or after the start date.')
+        return cleaned_data

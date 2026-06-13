@@ -1,0 +1,67 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}My Artworks - ArtLink{% endblock %}
+
+{% block studio_content %}
+<div class="studio-header">
+    <h1>My Artworks</h1>
+    <p>Manage listings, update details, and control availability from your studio.</p>
+</div>
+
+<div class="studio-panel">
+    <div class="studio-panel-header">
+        <h2>Artwork Collection</h2>
+        <a href="{% url 'upload_artwork' %}" class="btn">+ Upload New Artwork</a>
+    </div>
+    {% if artworks %}
+    <div class="studio-table-wrap">
+        <table class="studio-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Certificate</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artwork in artworks %}
+                <tr>
+                    <td>
+                        <img src="{% if artwork.images %}{{ artwork.images.url }}{% else %}https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=80&q=80{% endif %}" alt="{{ artwork.title }}">
+                    </td>
+                    <td><a href="{% url 'artwork_detail' artwork.pk %}">{{ artwork.title }}</a></td>
+                    <td>${{ artwork.price }}</td>
+                    <td><span class="status-pill status-{{ artwork.status }}">{{ artwork.get_status_display }}</span></td>
+                    <td style="font-family: monospace; font-size: 0.82rem;">{% if artwork.certificate %}{{ artwork.certificate.certificate_id }}{% else %}—{% endif %}</td>
+                    <td>
+                        <div class="inline-actions">
+                            <a href="{% url 'edit_artwork' artwork.pk %}" class="inline-btn inline-btn-edit">Edit</a>
+                            <form method="post" action="{% url 'toggle_artwork_status' artwork.pk %}">
+                                {% csrf_token %}
+                                {% if artwork.status == 'available' %}
+                                <input type="hidden" name="status" value="sold">
+                                <button type="submit" class="inline-btn inline-btn-neutral">Mark Sold</button>
+                                {% else %}
+                                <input type="hidden" name="status" value="available">
+                                <button type="submit" class="inline-btn inline-btn-gold">Mark Available</button>
+                                {% endif %}
+                            </form>
+                            <form method="post" action="{% url 'delete_artwork' artwork.pk %}" onsubmit="return confirm('Delete this artwork permanently?');">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-btn inline-btn-delete">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-studio">You haven't uploaded any artworks yet. <a href="{% url 'upload_artwork' %}">Upload your first piece</a>.</div>
+    {% endif %}
+</div>
+{% endblock %}

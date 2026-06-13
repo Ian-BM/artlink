@@ -137,7 +137,7 @@
         {% endif %}
         <div class="exhibition-cover-content">
             <h1>{{ exhibition.title }}</h1>
-            <p>Curated by {{ exhibition.curator_name }} · {{ exhibition.start_date|date:"F d, Y" }} - {{ exhibition.end_date|date:"F d, Y" }}</p>
+            <p>Curated by {{ exhibition.curator_name|default:exhibition.artist.username }} · {{ exhibition.start_date|date:"F d, Y" }} - {{ exhibition.end_date|date:"F d, Y" }}</p>
             <div class="exhibition-actions">
                 {% if artworks %}
                 <a href="{% url 'exhibition_gallery' exhibition.slug %}" class="btn">Enter Virtual Gallery</a>
@@ -148,8 +148,23 @@
     </section>
 
     <section class="curator-panel">
-        <h2>Curator Statement</h2>
+        <h2>About This Exhibition</h2>
         <p>{{ exhibition.description }}</p>
+    </section>
+
+    {% if exhibition.curator_statement %}
+    <section class="curator-panel">
+        <h2>Curator Statement</h2>
+        <p>{{ exhibition.curator_statement }}</p>
+    </section>
+    {% endif %}
+
+    <section class="curator-panel">
+        <h2>Artist</h2>
+        <p><a href="{% url 'artist_profile' exhibition.artist.pk %}">{{ exhibition.artist.username }}</a>{% if artist_profile.location %} · {{ artist_profile.location }}{% endif %}</p>
+        {% if artist_profile.artist_statement %}
+        <div class="artist-statement">{{ artist_profile.artist_statement }}</div>
+        {% endif %}
     </section>
 
     <section>

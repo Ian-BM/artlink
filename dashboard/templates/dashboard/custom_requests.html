@@ -1,23 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base_dashboard.html' %}
 
 {% block title %}Custom Requests - ArtLink{% endblock %}
 
-{% block content %}
+{% block studio_content %}
 <style>
-    .requests-page {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 3rem 2rem;
-    }
-
     .requests-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: end;
-        gap: 1rem;
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 3px solid var(--gold);
     }
 
     .requests-header h1 {
@@ -110,18 +98,8 @@
     }
 
     @media (max-width: 820px) {
-        .requests-page {
-            padding: 2rem 1rem;
-        }
-
-        .requests-header,
         .request-card {
             grid-template-columns: 1fr;
-        }
-
-        .requests-header {
-            display: grid;
-            align-items: start;
         }
 
         .request-meta {
@@ -134,15 +112,12 @@
     }
 </style>
 
-<div class="requests-page">
-    <div class="requests-header">
-        <div>
-            <h1>Custom Requests</h1>
-            <p>Review commission briefs and contact collectors directly.</p>
-        </div>
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
-    </div>
+<div class="requests-header">
+    <h1>Custom Requests</h1>
+    <p>Review commission briefs and contact collectors directly.</p>
+</div>
 
+<div class="studio-panel">
     <div class="request-list">
     {% for custom_request in custom_requests %}
         <article class="request-card">

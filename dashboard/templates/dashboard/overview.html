@@ -1,0 +1,94 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Dashboard Overview - ArtLink{% endblock %}
+
+{% block studio_content %}
+<div class="studio-header">
+    <h1>Dashboard Overview</h1>
+    <p>Your studio at a glance — artworks, inquiries, commissions, and exhibitions.</p>
+</div>
+
+<div class="studio-metrics">
+    <div class="studio-metric">
+        <div class="studio-metric-value">{{ metrics.total_uploaded }}</div>
+        <div class="studio-metric-label">Total Artworks</div>
+    </div>
+    <div class="studio-metric">
+        <div class="studio-metric-value">{{ metrics.active_listings }}</div>
+        <div class="studio-metric-label">Available Artworks</div>
+    </div>
+    <div class="studio-metric">
+        <div class="studio-metric-value">{{ metrics.total_sold }}</div>
+        <div class="studio-metric-label">Sold Artworks</div>
+    </div>
+    <div class="studio-metric">
+        <div class="studio-metric-value">{{ metrics.inquiries_count }}</div>
+        <div class="studio-metric-label">Inquiries</div>
+    </div>
+    <div class="studio-metric">
+        <div class="studio-metric-value">{{ metrics.custom_requests_count }}</div>
+        <div class="studio-metric-label">Custom Requests</div>
+    </div>
+    <div class="studio-metric">
+        <div class="studio-metric-value">{{ metrics.exhibitions_count }}</div>
+        <div class="studio-metric-label">Exhibitions</div>
+    </div>
+</div>
+
+<div class="studio-panel">
+    <div class="studio-panel-header">
+        <h2>Recent Activity</h2>
+        <div class="studio-actions">
+            <a href="{% url 'upload_artwork' %}" class="btn">Upload Artwork</a>
+            <a href="{% url 'create_exhibition' %}" class="btn btn-secondary">Create Exhibition</a>
+        </div>
+    </div>
+    <div class="activity-list">
+        {% for activity in recent_activity %}
+        <div class="activity-item">
+            <strong>{{ activity.kind }} · {{ activity.title }}</strong>
+            <span>{{ activity.detail }}</span>
+            <span>{{ activity.timestamp|date:"F d, Y H:i" }}</span>
+        </div>
+        {% empty %}
+        <div class="empty-studio">No recent activity yet. Upload artwork or publish an exhibition to get started.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="studio-panel">
+    <div class="studio-panel-header">
+        <h2>Latest Inquiries</h2>
+        <a href="{% url 'inquiry_inbox' %}" class="btn btn-secondary">View All</a>
+    </div>
+    <div class="activity-list">
+        {% for inquiry in recent_inquiries %}
+        <div class="activity-item">
+            <strong>{{ inquiry.buyer.get_full_name|default:inquiry.buyer.username }}</strong>
+            <span>Interested in {{ inquiry.artwork.title }}</span>
+            <span>{{ inquiry.created_at|date:"F d, Y H:i" }}</span>
+        </div>
+        {% empty %}
+        <div class="empty-studio">No buyer inquiries yet.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="studio-panel">
+    <div class="studio-panel-header">
+        <h2>Latest Custom Requests</h2>
+        <a href="{% url 'custom_request_inbox' %}" class="btn btn-secondary">View All</a>
+    </div>
+    <div class="activity-list">
+        {% for custom_request in recent_custom_requests %}
+        <div class="activity-item">
+            <strong>{{ custom_request.buyer_name }}</strong>
+            <span>{{ custom_request.get_artwork_type_display }} · Budget ${{ custom_request.budget }}</span>
+            <span>{{ custom_request.created_at|date:"F d, Y H:i" }}</span>
+        </div>
+        {% empty %}
+        <div class="empty-studio">No custom artwork requests yet.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

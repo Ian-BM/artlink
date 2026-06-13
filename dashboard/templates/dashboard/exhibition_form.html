@@ -1,0 +1,149 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}{% if form_mode == 'edit' %}Edit Exhibition{% else %}Create Exhibition{% endif %} - ArtLink{% endblock %}
+
+{% block studio_content %}
+<style>
+    .exhibition-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .exhibition-form-grid .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .exhibition-form-grid label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+        color: #111;
+    }
+
+    .exhibition-form-grid input,
+    .exhibition-form-grid textarea,
+    .exhibition-form-grid select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid rgba(17, 17, 17, 0.16);
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .artwork-picker {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+        max-height: 320px;
+        overflow: auto;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fafafa;
+    }
+
+    .artwork-picker label {
+        display: flex;
+        gap: 0.65rem;
+        align-items: start;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        font-weight: 500;
+    }
+
+    .field-error {
+        color: #842029;
+        font-size: 0.9rem;
+        margin-top: 0.35rem;
+    }
+
+    @media (max-width: 768px) {
+        .exhibition-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="studio-header">
+    <h1>{% if form_mode == 'edit' %}Edit Exhibition{% else %}Create Exhibition{% endif %}</h1>
+    <p>Curate a museum-quality show with artwork selection, cover imagery, and publish controls.</p>
+</div>
+
+<div class="studio-panel">
+    <form method="post" enctype="multipart/form-data" class="exhibition-form-grid">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="full-width field-error">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <div>
+            <label for="{{ form.title.id_for_label }}">Title</label>
+            {{ form.title }}
+            {% for error in form.title.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.slug.id_for_label }}">Slug</label>
+            {{ form.slug }}
+            {% for error in form.slug.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.start_date.id_for_label }}">Start Date</label>
+            {{ form.start_date }}
+            {% for error in form.start_date.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.end_date.id_for_label }}">End Date</label>
+            {{ form.end_date }}
+            {% for error in form.end_date.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.visibility.id_for_label }}">Visibility</label>
+            {{ form.visibility }}
+            {% for error in form.visibility.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.cover_image.id_for_label }}">Cover Image</label>
+            {{ form.cover_image }}
+            {% if exhibition and exhibition.cover_image %}
+            <p style="margin-top:0.5rem;color:var(--muted);font-size:0.9rem;">Current cover uploaded.</p>
+            {% endif %}
+        </div>
+        <div class="full-width">
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+            {% for error in form.description.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="full-width">
+            <label for="{{ form.curator_statement.id_for_label }}">Curator Statement</label>
+            {{ form.curator_statement }}
+            {% for error in form.curator_statement.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="full-width">
+            <label for="{{ form.featured_image.id_for_label }}">Featured Image</label>
+            {{ form.featured_image }}
+            {% if exhibition and exhibition.featured_image %}
+            <p style="margin-top:0.5rem;color:var(--muted);font-size:0.9rem;">Current featured image uploaded.</p>
+            {% endif %}
+        </div>
+        <div class="full-width">
+            <label>Select Artworks</label>
+            <div class="artwork-picker">
+                {% for checkbox in form.artworks %}
+                {{ checkbox }}
+                {% empty %}
+                <p>No artworks available. Upload artworks first.</p>
+                {% endfor %}
+            </div>
+            {% for error in form.artworks.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="full-width studio-actions">
+            <button type="submit" class="btn">{% if form_mode == 'edit' %}Save Exhibition{% else %}Create Exhibition{% endif %}</button>
+            <a href="{% url 'dashboard_exhibitions' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

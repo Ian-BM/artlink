@@ -1,28 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base_dashboard.html' %}
 
 {% block title %}Inquiry Inbox - ArtLink{% endblock %}
 
-{% block content %}
+{% block studio_content %}
 <style>
-    .inquiries-page {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
     .inquiries-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 3px solid var(--gold);
     }
 
     .inquiries-header h1 {
+        font-family: 'Elsie', serif;
         color: #111;
-        margin: 0;
+        margin: 0 0 0.5rem;
     }
 
     .inquiry-list {
@@ -84,11 +73,6 @@
     }
 
     @media (max-width: 768px) {
-        .inquiries-page {
-            padding: 1rem;
-        }
-
-        .inquiries-header,
         .inquiry-card-header {
             flex-direction: column;
         }
@@ -100,15 +84,12 @@
     }
 </style>
 
-<div class="inquiries-page">
-    <div class="inquiries-header">
-        <div>
-            <h1>Buyer Inquiries</h1>
-            <p>Review buyer messages and reply using the existing email or WhatsApp flow.</p>
-        </div>
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
-    </div>
+<div class="inquiries-header">
+    <h1>Buyer Inquiries</h1>
+    <p>Review buyer messages and reply using the existing email or WhatsApp flow.</p>
+</div>
 
+<div class="studio-panel">
     <div class="inquiry-list">
     {% for inquiry in inquiries %}
         <div class="inquiry-card">
